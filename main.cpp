@@ -20,6 +20,8 @@ struct personagem
   int jump_stamina;
   int actual_jump_stamina;
   char direction;
+  bool isPaused;
+  bool inGame;
 };
 
 struct personagem personagem1; 
@@ -34,9 +36,11 @@ void setPlayerConfig()
   personagem1.VetorAccX = 5;
   personagem1.VetorAccY = 5;
   personagem1.actual_jump_stamina = 0;
-  personagem1.jump_stamina = 200;
+  personagem1.jump_stamina = 120;
   personagem1.direction = 'none';
   personagem1.state = 'running';
+  personagem1.isPaused = true;
+  personagem1.inGame = false;
   //personagem1.src = './src/Dude_Monster.png';
   //personagem1.state = 'idle';
 }
@@ -162,6 +166,10 @@ void Gravity()
   	personagem1.can_jump = true;
   }
 }
+void PauseListener()
+{
+
+}
 
 int main()  
 { 
@@ -178,7 +186,7 @@ int main()
   getimage(0, 0, 31, 31, M); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP,P,M);
   backgroundConfig();
-  while(1)
+  while(personagem1.inGame)
   {
 	if (pg == 1) pg = 2; else pg = 1;
     setactivepage(pg);
@@ -186,12 +194,29 @@ int main()
     putimage(personagem1.PosX, personagem1.PosY, M, AND_PUT);
     putimage(personagem1.PosX, personagem1.PosY, P, OR_PUT);
     Move();
+    PauseListener();
     StateCheck(personagem1.direction);
     Gravity();
-	setvisualpage(pg);
+	  setvisualpage(pg);
     
 
     delay(10);
+  }
+  readimagefile("pauseScreen.bmp",0 , 0 , 302, 165); // carrega a imagem
+  TamP = imagesize(0, 0, 302, 165);
+  P = (unsigned char *)malloc(TamP);
+  M = (unsigned char *)malloc(TamP);
+  getimage(0, 0, 302, 165, P); // captura para o ponteiro P
+  getimage(0, 0, 302, 165, M); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP,P,M);
+  while(personagem1.isPaused)
+  {
+    if (pg == 1) pg = 2; else pg = 1;
+    setactivepage(pg);
+    cleardevice(); 
+    putimage(0, 0, M, AND_PUT);
+    putimage(0, 0, P, OR_PUT);
+    setvisualpage(pg);
   }
   
   //while(!kbhit());	
