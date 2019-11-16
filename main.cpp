@@ -6,6 +6,15 @@
 
 using namespace std;
 
+#define ESC    	27
+
+
+unsigned char *imagens[2];
+unsigned char *mascaras[2];
+int TamP[2];
+//Aqui está o esquema de camadas para trabalhar com UI
+int layer = 0;
+int blink = 0;
 struct personagem
 {
   int PosX;
@@ -23,6 +32,12 @@ struct personagem
   bool isPaused;
   bool inGame;
 };
+
+// struct projectile
+// {
+//   int width;
+//   int size;
+// };
 
 struct personagem personagem1; 
 
@@ -62,7 +77,7 @@ void ImageConfig(int Tam, unsigned char *Img, unsigned char *Msk)
   R = Img[26];
   for(i=24; i < Tam; i+=4) 
   {
-    if (Img[i]==B and Img[i+1]==G and Img[i+2]==R) 
+    if (Img[i]==B && Img[i+1]==G && Img[i+2]==R) 
     {
       Img[i] = 0;
       Img[i+1] = 0;
@@ -116,13 +131,11 @@ void Move()
   {
   	personagem1.direction='left';
     personagem1.PosX -= personagem1.VetorAccX;
-    printf("esquerda");
   }
   if(GetKeyState(VK_RIGHT)&0x80)
   {
   	personagem1.direction='right';
     personagem1.PosX += personagem1.VetorAccX;
-    printf("direita.");
   }
   if(GetKeyState(VK_UP)&0x80 && personagem1.can_jump)
   {
@@ -136,14 +149,13 @@ void Move()
     if(personagem1.actual_jump_stamina == 0)
     {
       personagem1.can_jump = false; 
-      printf("no puedes mas dar pulitos.");
     }
 	}
   else
   {
     if(personagem1.actual_jump_stamina != personagem1.jump_stamina)
     {
-      personagem1.actual_jump_stamina +=4;
+      personagem1.actual_jump_stamina += 4;
       printf("%i",personagem1.actual_jump_stamina);
     }
     else
@@ -159,65 +171,100 @@ void Move()
 
 void Gravity()
 {
-  personagem1.PosY +=5;
+  personagem1.PosY += 5;
   if(personagem1.PosY >= personagem1.ground)
   {
   	personagem1.PosY = personagem1.ground;
   	personagem1.can_jump = true;
   }
 }
-void PauseListener()
-{
 
+void imagesRenderer()
+{
+  TamP[0] = imagesize(0, 0, 31, 31);
+  TamP[1] = imagesize(0, 0, 649, 479);
+
+  readimagefile("Sans.bmp",0 , 0 , 31, 31); // carrega a imagem
+  imagens[0] = (unsigned char *)malloc(TamP[0]);
+  mascaras[0] = (unsigned char *)malloc(TamP[0]);
+  getimage(0, 0, 31, 31, imagens[0]); // captura para o ponteiro P
+  getimage(0, 0, 31, 31, mascaras[0]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[0],imagens[0],mascaras[0]);
+
+  readimagefile("pause.BMP",0 , 0 , 639, 479); // carrega a imagem
+  imagens[1] = (unsigned char *)malloc(TamP[1]);
+  mascaras[1] = (unsigned char *)malloc(TamP[1]);
+  getimage(0, 0, 649, 479, imagens[1]); // captura para o ponteiro P
+  getimage(0, 0, 649, 479, mascaras[1]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[1],imagens[1],mascaras[1]);
+
+  cleardevice();// limpa a tela
+}
+
+void globalKeyListener()
+{
+  fflush(stdin);
+  
+  if (kbhit())
+  {
+    int key = getch(); 
+    if(key == VK_ESCAPE)
+    {
+      personagem1.inGame = !personagem1.inGame;
+      personagem1.isPaused = !personagem1.isPaused;
+    }
+  }
 }
 
 int main()  
 { 
   int pg = 1;
-  unsigned char *P, *M;
-  int TamP;
+  
   initwindow(800, 600);	
   setPlayerConfig();
-  TamP = imagesize(0, 0, 31, 31);
-  P = (unsigned char *)malloc(TamP);
-  M = (unsigned char *)malloc(TamP);
-  readimagefile("Sans.bmp",0 , 0 , 31, 31); // carrega a imagem
-  getimage(0, 0, 31, 31, P); // captura para o ponteiro P
-  getimage(0, 0, 31, 31, M); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP,P,M);
+  imagesRenderer();
   backgroundConfig();
-  while(personagem1.inGame)
+  while(1)
   {
-	if (pg == 1) pg = 2; else pg = 1;
-    setactivepage(pg);
-    cleardevice();    
-    putimage(personagem1.PosX, personagem1.PosY, M, AND_PUT);
-    putimage(personagem1.PosX, personagem1.PosY, P, OR_PUT);
-    Move();
-    PauseListener();
-    StateCheck(personagem1.direction);
-    Gravity();
-	  setvisualpage(pg);
-    
+    globalKeyListener();
+    if(personagem1.inGame)
+    {
+      if (pg == 1) pg = 2; else pg = 1;
+      setactivepage(pg);
+      cleardevice();    
+      putimage(personagem1.PosX, personagem1.PosY, mascaras[0],AND_PUT);
+      putimage(personagem1.PosX, personagem1.PosY, imagens[0], OR_PUT);
+      Move(); 
+      StateCheck(personagem1.direction);
+      Gravity();
+      setvisualpage(pg);
+      
 
-    delay(10);
+      delay(10);
+    }
+    if(personagem1.isPaused)
+    {
+      if (pg == 1) pg = 2; else pg = 1;
+      setactivepage(pg);
+      cleardevice(); 
+      putimage(0, 0, mascaras[1], AND_PUT);
+      putimage(0, 0, imagens[1], OR_PUT);
+      if(blink >= 160)
+      {
+        outtextxy(300,200,"Tela de pause mesmo rapaz");
+        if(blink == 320)
+        {
+          blink = 0;
+        }
+      }
+      if(blink <= 320)
+      {
+        blink++;
+      }
+      setvisualpage(pg);
+    }
   }
-  readimagefile("pauseScreen.bmp",0 , 0 , 302, 165); // carrega a imagem
-  TamP = imagesize(0, 0, 302, 165);
-  P = (unsigned char *)malloc(TamP);
-  M = (unsigned char *)malloc(TamP);
-  getimage(0, 0, 302, 165, P); // captura para o ponteiro P
-  getimage(0, 0, 302, 165, M); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP,P,M);
-  while(personagem1.isPaused)
-  {
-    if (pg == 1) pg = 2; else pg = 1;
-    setactivepage(pg);
-    cleardevice(); 
-    putimage(0, 0, M, AND_PUT);
-    putimage(0, 0, P, OR_PUT);
-    setvisualpage(pg);
-  }
+  
   
   //while(!kbhit());	
   //closegraph();	
