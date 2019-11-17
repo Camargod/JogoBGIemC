@@ -15,6 +15,16 @@ int TamP[2];
 //Aqui está o esquema de camadas para trabalhar com UI
 int layer = 0;
 int blink = 0;
+
+struct gameConfigurations
+{
+  bool isPaused;
+  bool inGame;
+  bool money;
+  bool time;
+  bool round;
+};
+
 struct personagem
 {
   int PosX;
@@ -29,17 +39,25 @@ struct personagem
   int jump_stamina;
   int actual_jump_stamina;
   char direction;
-  bool isPaused;
-  bool inGame;
+
 };
 
-// struct projectile
-// {
-//   int width;
-//   int size;
-// };
+struct projectile
+{
+  int width;
+  int size;
+  int speed;
+};
 
+struct projectile projeteis[];
 struct personagem personagem1; 
+struct gameConfiguration gameConfig;
+
+void startGameConfig()
+{
+  gameConfig.isPaused = true;
+  gameConfig.inGame = false;
+}
 
 void setPlayerConfig()
 {
@@ -54,8 +72,6 @@ void setPlayerConfig()
   personagem1.jump_stamina = 120;
   personagem1.direction = 'none';
   personagem1.state = 'running';
-  personagem1.isPaused = true;
-  personagem1.inGame = false;
   //personagem1.src = './src/Dude_Monster.png';
   //personagem1.state = 'idle';
 }
@@ -139,17 +155,17 @@ void Move()
   }
   if(GetKeyState(VK_UP)&0x80 && personagem1.can_jump)
   {
-  	printf("%i",personagem1.actual_jump_stamina);
-  	personagem1.state = 'jumping';
-    personagem1.PosY += -10;
-    if(personagem1.actual_jump_stamina > 0)
-    {
-      personagem1.actual_jump_stamina -= 4;
-    }
-    if(personagem1.actual_jump_stamina == 0)
-    {
-      personagem1.can_jump = false; 
-    }
+  	// printf("%i",personagem1.actual_jump_stamina);
+  	// personagem1.state = 'jumping';
+    // personagem1.PosY += -10;
+    // if(personagem1.actual_jump_stamina > 0)
+    // {
+    //   personagem1.actual_jump_stamina -= 4;
+    // }
+    // if(personagem1.actual_jump_stamina == 0)
+    // {
+    //   personagem1.can_jump = false; 
+    // }
 	}
   else
   {
