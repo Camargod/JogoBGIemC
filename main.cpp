@@ -12,9 +12,9 @@ using namespace std;
 #define ESC    	27
 
 
-unsigned char *imagens[3];
-unsigned char *mascaras[3];
-int TamP[3];
+unsigned char *imagens[4];
+unsigned char *mascaras[4];
+int TamP[4];
 //Aqui está o esquema de camadas para trabalhar com UI
 int layer = 0;
 int blink = 0;
@@ -37,11 +37,20 @@ struct gameConfigurations
 };
 
 int projectileNumber = 0;
-struct personagem
+struct torre
 {
   float PosX;
   float PosY;
   char src;
+  bool isEnabled;
+};
+
+struct enemies
+{
+  float PosX;
+  float PosY;
+  char src;
+  bool isEnabled;
 };
 
 struct projectile
@@ -60,8 +69,8 @@ struct projectile
 };
 
 struct gameConfigurations gameConfig;
-struct personagem torres[7];
-struct personagem inimigos[20]; 
+struct torre torres[7];
+struct enemies inimigos[20]; 
 struct projectile projeteis[100];
 
 
@@ -89,10 +98,29 @@ void projectileConfig()
 void setPlayerConfig()
 {
   torres[0].PosX = 420;
-  torres[0].PosY = 420;
+  torres[0].PosY = 425;
+  torres[1].PosX = 175;
+  torres[1].PosY = 350;
+  torres[2].PosX = 275;
+  torres[2].PosY = 220;
+  torres[3].PosX = 725;
+  torres[3].PosY = 570;
+  torres[4].PosX = 760;
+  torres[4].PosY = 130;
+  torres[5].PosX = 925;
+  torres[5].PosY = 425;
+  torres[6].PosX = 1190;
+  torres[6].PosY = 210;
+  torres[0].isEnabled = true;
+  torres[1].isEnabled = true;
+  torres[2].isEnabled = true;
+  torres[3].isEnabled = true;
+  torres[4].isEnabled = true;
+  torres[5].isEnabled = true;
+  torres[6].isEnabled = true;
 
-  inimigos[0].PosX = 730;
-  inimigos[0].PosY = 180;
+  inimigos[0].PosX = 420;
+  inimigos[0].PosY = 320;
 
 }
 
@@ -136,27 +164,66 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
 {
   if(!projeteis[gameConfig.index].isLoaded)
   {
-    projeteis[gameConfig.index].isLoaded = true;
-    projeteis[gameConfig.index].x = posInit[0];
-    projeteis[gameConfig.index].y = posInit[1];
+    projeteis[gameConfig.index].x = posInit[0] + 15;
+    projeteis[gameConfig.index].y = posInit[1] + 15;
     projeteis[gameConfig.index].speed = structureSpeed;
     projeteis[gameConfig.index].size = 4;
     projeteis[gameConfig.index].initX = posInit[0];
     projeteis[gameConfig.index].initY = posInit[1];
     projeteis[gameConfig.index].finX = posFinal[0];
     projeteis[gameConfig.index].finY = posFinal[1];
+    double a;
+    double b;
+    if(projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY > 0)
+    {
+      a = pow((projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY),2);
+    }
+    if(projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY == 0)
+    {
+      a = 0;
+    }
+    if (projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY < 0)
+    {
+      a = pow((projeteis[gameConfig.index].finY - projeteis[gameConfig.index].initY),2);
+    }
+
+    if(projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX > 0)
+    {
+      b = pow((projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX),2);
+    }
+    if(projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX == 0)
+    {
+      b = 0;
+    }
+    if (projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX < 0)
+    {
+      b = pow((projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX),2);
+    }
     
-    double a = pow((projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY),2);
-    double b = pow((projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX),2);
+    b = pow((projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX),2);
     double hip = sqrt(a + b);
     printf("Cateto Adjacente do projetil %i : %lf\n",gameConfig.index,a);
     printf("Cateto Oposto do projetil %i : %lf\n",gameConfig.index,b);
     printf("Hipotenusa do projetil %i : %lf\n",gameConfig.index,hip);
-    projeteis[gameConfig.index].Xvet = sin(b /hip);
-    projeteis[gameConfig.index].Yvet = cos(a /hip);
-    printf("Seno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
-    printf("Seno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
-    printf("Coseno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
+    if(b !=0)
+    {
+      projeteis[gameConfig.index].Xvet =  cos(b /hip);
+    }
+    else
+    {
+      projeteis[gameConfig.index].Xvet = 0;
+    }
+    if(a !=0)
+    {
+      projeteis[gameConfig.index].Yvet =  sin(a /hip);
+    }
+    else
+    {
+      projeteis[gameConfig.index].Yvet = 0;
+    }
+    printf("Seno do projetil (Yvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
+    printf("Coseno do projetil (Xvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
+    projeteis[gameConfig.index].isLoaded = true;
   }
   else
   {
@@ -166,7 +233,6 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
     }
     gameConfig.index++;
   }
-
 }
 #pragma endregion
 void Move()
@@ -188,7 +254,7 @@ void imagesRenderer()
   TamP[0] = imagesize(0, 0, 31, 31);
   TamP[1] = imagesize(0, 0, 649, 479);
   TamP[2] = imagesize(0,0,1279,719);
-
+  TamP[3] = imagesize(0,0,48,69);
   readimagefile("mainScene.bmp",0 , 0 , 1279, 719); // carrega a imagem
   imagens[2] = (unsigned char *)malloc(TamP[2]);
   mascaras[2] = (unsigned char *)malloc(TamP[2]);
@@ -210,6 +276,13 @@ void imagesRenderer()
   getimage(0, 0, 649, 479, mascaras[1]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[1],imagens[1],mascaras[1]);
 
+  readimagefile("Frisk.bmp",0 , 0 , 48, 69); // carrega a imagem
+  imagens[3] = (unsigned char *)malloc(TamP[3]);
+  mascaras[3] = (unsigned char *)malloc(TamP[3]);
+  getimage(0, 0, 48, 69, imagens[3]); // captura para o ponteiro P
+  getimage(0, 0, 48, 69, mascaras[3]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[3],imagens[3],mascaras[3]);
+
   cleardevice();// limpa a tela
 }
 
@@ -227,7 +300,7 @@ void globalKeyListener()
       if(gameConfig.inGame)
       {
         mciSendString("open \"./src/sounds/tema.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-        mciSendString("play mp3 notify repeat", NULL, 0, 0);
+        // mciSendString("play mp3 notify repeat", NULL, 0, 0);
       }
     }
   }
@@ -240,10 +313,6 @@ void putImages()
 {
   putimage(0,0,mascaras[2],AND_PUT);
   putimage(0,0,imagens[2], OR_PUT);
-  putimage(torres[0].PosX, torres[0].PosY, mascaras[0],AND_PUT);
-  putimage(torres[0].PosX, torres[0].PosY, imagens[0], OR_PUT);
-  putimage(inimigos[0].PosX, inimigos[0].PosY, mascaras[0],AND_PUT);
-  putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[0], OR_PUT);
 
   setfillstyle(1,RGB(0,0,0));
   projeteis[0].isLoaded ? fillellipse(projeteis[0].x, projeteis[0].y,projeteis[0].size,projeteis[0].size) : nothing();
@@ -296,15 +365,60 @@ void putImages()
   // projeteis[47].isLoaded ? fillellipse(projeteis[47].x, projeteis[47].y,projeteis[47].size,projeteis[47].size) : nothing();
   // projeteis[48].isLoaded ? fillellipse(projeteis[48].x, projeteis[48].y,projeteis[48].size,projeteis[48].size) : nothing();
   // projeteis[49].isLoaded ? fillellipse(projeteis[49].x, projeteis[49].y,projeteis[49].size,projeteis[49].size) : nothing();
+  torres[0].isEnabled ? putimage(torres[0].PosX, torres[0].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[0].isEnabled ? putimage(torres[0].PosX, torres[0].PosY, imagens[0], OR_PUT) : nothing();
+  torres[1].isEnabled ? putimage(torres[1].PosX, torres[1].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[1].isEnabled ? putimage(torres[1].PosX, torres[1].PosY, imagens[0], OR_PUT) : nothing();
+  torres[2].isEnabled ? putimage(torres[2].PosX, torres[2].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[2].isEnabled ? putimage(torres[2].PosX, torres[2].PosY, imagens[0], OR_PUT) : nothing();
+  torres[3].isEnabled ? putimage(torres[3].PosX, torres[3].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[3].isEnabled ? putimage(torres[3].PosX, torres[3].PosY, imagens[0], OR_PUT) : nothing();
+  torres[4].isEnabled ? putimage(torres[4].PosX, torres[4].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[4].isEnabled ? putimage(torres[4].PosX, torres[4].PosY, imagens[0], OR_PUT) : nothing();
+  torres[5].isEnabled ? putimage(torres[5].PosX, torres[5].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[5].isEnabled ? putimage(torres[5].PosX, torres[5].PosY, imagens[0], OR_PUT) : nothing();
+  torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, mascaras[0],AND_PUT) : nothing();
+  torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, imagens[0], OR_PUT) : nothing();
+  inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, mascaras[3],AND_PUT) : nothing();
+  inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[3], OR_PUT) : nothing();
   rectangle(10,10,10,10);
-  if(projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX  > 2000 || projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX < -200 || projeteis[gameConfig.projectileIndex].y > 1000 || projeteis[gameConfig.projectileIndex].y < -100 )
+  if(projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX  > 5000 || projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX < -600 || projeteis[gameConfig.projectileIndex].y > 1000 || projeteis[gameConfig.projectileIndex].y < -100 )
   {
     projeteis[gameConfig.projectileIndex].isLoaded = false;
   }
   if(projeteis[gameConfig.projectileIndex].isLoaded)
   {
-    projeteis[gameConfig.projectileIndex].x -= projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Xvet;
-    projeteis[gameConfig.projectileIndex].y -= projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Yvet;
+    if(projeteis[gameConfig.projectileIndex].Xvet > 0)
+    {
+      // printf("Vetor X maior que 0");
+      projeteis[gameConfig.projectileIndex].x += projeteis[gameConfig.projectileIndex].speed * (projeteis[gameConfig.projectileIndex].Xvet);
+    }
+    if(projeteis[gameConfig.projectileIndex].Xvet == 0)
+    {
+      projeteis[gameConfig.projectileIndex].x += 0;
+      projeteis[gameConfig.projectileIndex].y += projeteis[gameConfig.projectileIndex].Yvet < 0 ? projeteis[gameConfig.projectileIndex].speed : projeteis[gameConfig.projectileIndex].speed * -1;
+
+    }
+    if(projeteis[gameConfig.projectileIndex].Xvet < 0)
+    {
+      // printf("Vetor X menor que 0");
+      projeteis[gameConfig.projectileIndex].x += projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Xvet;
+    }
+    
+    if(projeteis[gameConfig.projectileIndex].Yvet > 0)
+    {
+      projeteis[gameConfig.projectileIndex].y += (projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Yvet);
+    }
+    if(projeteis[gameConfig.projectileIndex].Yvet == 0)
+    {
+      projeteis[gameConfig.projectileIndex].y += 0;
+      projeteis[gameConfig.projectileIndex].x += projeteis[gameConfig.projectileIndex].Xvet > 0 ? projeteis[gameConfig.projectileIndex].speed : projeteis[gameConfig.projectileIndex].speed * -1;
+    }
+    if(projeteis[gameConfig.projectileIndex].Yvet < 0)
+    {
+      projeteis[gameConfig.projectileIndex].y += projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Yvet;
+    }
+    
   }
   if(gameConfig.projectileIndex == 25)
   {
@@ -363,7 +477,7 @@ int main()
       putimage(0, 0, imagens[1], OR_PUT);
       if(blink >= 160)
       {
-        outtextxy(300,200,"Tela de pause mesmo rapaz");
+        outtextxy(300,200,"Tela de pause mesmo rapaz aaaa");
         if(blink == 320)
         {
           blink = 0;
