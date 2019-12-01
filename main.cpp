@@ -3,7 +3,7 @@
 #include<iostream>
 #include<graphics.h>
 #include<time.h>
-
+#include<math.h>
 #include <windows.h>
 #include "MMSystem.h"
 #pragma comment(lib, "winmm.lib");
@@ -41,32 +41,22 @@ struct personagem
 {
   float PosX;
   float PosY;
-  float VetorAccX;
-  float VetorAccY;
-  char state;
   char src;
-  int maxJump;
-  int ground;
-  bool can_jump;
-  int jump_stamina;
-  int actual_jump_stamina;
-  char direction;
-
 };
 
 struct projectile
 {
   int size;
-  int speed;
+  double speed;
   bool isLoaded;
-  int x;
-  int y;
-  int initX;
-  int initY;
-  int finX;
-  int finY;
-  int Xvet;
-  int Yvet;
+  double x;
+  double y;
+  double initX;
+  double initY;
+  double finX;
+  double finY;
+  double Xvet;
+  double Yvet;
 };
 
 struct gameConfigurations gameConfig;
@@ -92,7 +82,8 @@ void projectileConfig()
   for(int index = 0; index < 100; index -=-1)
   {
     projeteis[index].isLoaded = false;
-    projeteis[index].x = 5000;
+    projeteis[index].x = 0;
+    projeteis[index].y = 0;
   }
 }
 void setPlayerConfig()
@@ -101,16 +92,8 @@ void setPlayerConfig()
   torres[0].PosY = 420;
 
   inimigos[0].PosX = 730;
-  inimigos[0].PosY = 580;
-  inimigos[0].maxJump = -220;
-  inimigos[0].ground = 600;
-  inimigos[0].can_jump = true;
-  inimigos[0].VetorAccX = 5;
-  inimigos[0].VetorAccY = 5;
-  inimigos[0].actual_jump_stamina = 0;
-  inimigos[0].jump_stamina = 120;
-  //personagem1.src = './src/Dude_Monster.png';
-  //personagem1.state = 'idle';
+  inimigos[0].PosY = 180;
+
 }
 
 void backgroundConfig() 
@@ -153,28 +136,27 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
 {
   if(!projeteis[gameConfig.index].isLoaded)
   {
-    // malloc(int * sizeof(int *))
     projeteis[gameConfig.index].isLoaded = true;
     projeteis[gameConfig.index].x = posInit[0];
     projeteis[gameConfig.index].y = posInit[1];
     projeteis[gameConfig.index].speed = structureSpeed;
     projeteis[gameConfig.index].size = 4;
-    if(projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX < 0)
-    {
-      projeteis[gameConfig.index].Xvet = -1;
-    }
-    else
-    {
-      projeteis[gameConfig.index].Xvet = 1;
-    }
-    if(projeteis[gameConfig.index].finY - projeteis[gameConfig.index].initY < 0)
-    {
-      projeteis[gameConfig.index].Yvet = -1;
-    }
-    else
-    {
-      projeteis[gameConfig.index].Yvet = 1;
-    }
+    projeteis[gameConfig.index].initX = posInit[0];
+    projeteis[gameConfig.index].initY = posInit[1];
+    projeteis[gameConfig.index].finX = posFinal[0];
+    projeteis[gameConfig.index].finY = posFinal[1];
+    
+    double a = pow((projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY),2);
+    double b = pow((projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX),2);
+    double hip = sqrt(a + b);
+    printf("Cateto Adjacente do projetil %i : %lf\n",gameConfig.index,a);
+    printf("Cateto Oposto do projetil %i : %lf\n",gameConfig.index,b);
+    printf("Hipotenusa do projetil %i : %lf\n",gameConfig.index,hip);
+    projeteis[gameConfig.index].Xvet = sin(b /hip);
+    projeteis[gameConfig.index].Yvet = cos(a /hip);
+    printf("Seno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
+    printf("Seno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
+    printf("Coseno do projetil %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
   }
   else
   {
@@ -318,12 +300,11 @@ void putImages()
   if(projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX  > 2000 || projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX < -200 || projeteis[gameConfig.projectileIndex].y > 1000 || projeteis[gameConfig.projectileIndex].y < -100 )
   {
     projeteis[gameConfig.projectileIndex].isLoaded = false;
-    projeteis[gameConfig.projectileIndex].x = 5000;
   }
   if(projeteis[gameConfig.projectileIndex].isLoaded)
   {
-    projeteis[gameConfig.projectileIndex].x += projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Xvet;
-    projeteis[gameConfig.projectileIndex].y += projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Yvet;
+    projeteis[gameConfig.projectileIndex].x -= projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Xvet;
+    projeteis[gameConfig.projectileIndex].y -= projeteis[gameConfig.projectileIndex].speed * projeteis[gameConfig.projectileIndex].Yvet;
   }
   if(gameConfig.projectileIndex == 25)
   {
