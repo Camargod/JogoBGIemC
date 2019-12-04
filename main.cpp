@@ -12,9 +12,9 @@ using namespace std;
 #define ESC    	27
 
 
-unsigned char *imagens[4];
-unsigned char *mascaras[4];
-int TamP[4];
+unsigned char *imagens[5];
+unsigned char *mascaras[5];
+int TamP[5];
 //Aqui está o esquema de camadas para trabalhar com UI
 int layer = 0;
 int blink = 0;
@@ -34,6 +34,9 @@ struct gameConfigurations
   float timePassed;
   int index;
   int projectileIndex;
+  int enemiesIndex;
+  int enemiesMoveIndex;
+  int colisionsIndex;
 };
 
 int projectileNumber = 0;
@@ -51,6 +54,9 @@ struct enemies
   float PosY;
   char src;
   bool isEnabled;
+  float vetX;
+  float vetY;
+  float speed = 10;
 };
 
 struct projectile
@@ -68,12 +74,135 @@ struct projectile
   double Yvet;
 };
 
+struct colisionRoutes
+{
+  int x;
+  int y;
+  int vetX;
+  int vetY;
+};
+
 struct gameConfigurations gameConfig;
 struct torre torres[7];
 struct enemies inimigos[20]; 
 struct projectile projeteis[100];
+struct colisionRoutes colisionRoutesBoxes[17];
 
+void setRoutesConfig()
+{
+  colisionRoutesBoxes[0].x = 200;
+  colisionRoutesBoxes[0].y = 280;
+  colisionRoutesBoxes[0].vetX = -1;
+  colisionRoutesBoxes[0].vetY = 0;
 
+  colisionRoutesBoxes[1].x = 125;
+  colisionRoutesBoxes[1].y = 280;
+  colisionRoutesBoxes[1].vetX = 0;
+  colisionRoutesBoxes[1].vetY = 1;
+
+  colisionRoutesBoxes[2].x = 530;
+  colisionRoutesBoxes[2].y = 30;
+  colisionRoutesBoxes[2].vetX = 0;
+  colisionRoutesBoxes[2].vetY = 1;
+  
+  colisionRoutesBoxes[3].x = 125;
+  colisionRoutesBoxes[3].y = 380;
+  colisionRoutesBoxes[3].vetX = -1;
+  colisionRoutesBoxes[3].vetY = 0;
+
+  colisionRoutesBoxes[4].x = 410;
+  colisionRoutesBoxes[4].y = 280;
+  colisionRoutesBoxes[4].vetX = -1;
+  colisionRoutesBoxes[4].vetY = 0;
+
+  colisionRoutesBoxes[5].x = 420;
+  colisionRoutesBoxes[5].y = 340;
+  colisionRoutesBoxes[5].vetX = 0;
+  colisionRoutesBoxes[5].vetY = -1;
+
+  colisionRoutesBoxes[6].x = 480;
+  colisionRoutesBoxes[6].y = 340;
+  colisionRoutesBoxes[6].vetX = 0;
+  colisionRoutesBoxes[6].vetY = 1;
+
+  colisionRoutesBoxes[6].x = 640;
+  colisionRoutesBoxes[6].y = 340;
+  colisionRoutesBoxes[6].vetX = -1;
+  colisionRoutesBoxes[6].vetY = 0;
+
+  colisionRoutesBoxes[6].x = 640;
+  colisionRoutesBoxes[6].y = 170;
+  colisionRoutesBoxes[6].vetX = -1;
+  colisionRoutesBoxes[6].vetY = 0;
+
+  colisionRoutesBoxes[7].x = 480;
+  colisionRoutesBoxes[7].y = 340;
+  colisionRoutesBoxes[7].vetX = -1;
+  colisionRoutesBoxes[7].vetY = 0;
+
+  colisionRoutesBoxes[8].x = 985;
+  colisionRoutesBoxes[8].y = 340;
+  colisionRoutesBoxes[8].vetX = -1;
+  colisionRoutesBoxes[8].vetY = 0;
+  
+  colisionRoutesBoxes[9].x = 985;
+  colisionRoutesBoxes[9].y = 570;
+  colisionRoutesBoxes[9].vetX = 0;
+  colisionRoutesBoxes[9].vetY = -1;
+
+  colisionRoutesBoxes[10].x = 1130;
+  colisionRoutesBoxes[10].y = 570;
+  colisionRoutesBoxes[10].vetX = -1;
+  colisionRoutesBoxes[10].vetY = 0;
+
+  colisionRoutesBoxes[11].x = 630;
+  colisionRoutesBoxes[11].y = 340;
+  colisionRoutesBoxes[11].vetX = 0;
+  colisionRoutesBoxes[11].vetY = 1;
+
+  colisionRoutesBoxes[12].x = 810;
+  colisionRoutesBoxes[12].y = 60;
+  colisionRoutesBoxes[12].vetX = 0;
+  colisionRoutesBoxes[12].vetY = 1;
+
+  colisionRoutesBoxes[13].x = 810;
+  colisionRoutesBoxes[13].y = 170;  
+  colisionRoutesBoxes[13].vetX = 0;
+  colisionRoutesBoxes[13].vetY = 1;
+
+  colisionRoutesBoxes[14].x = 775;
+  colisionRoutesBoxes[14].y = 340;
+  colisionRoutesBoxes[14].vetX = -1; //aleatorio
+  colisionRoutesBoxes[14].vetY = 0;
+
+  colisionRoutesBoxes[15].x = 480;
+  colisionRoutesBoxes[15].y = 465;
+  colisionRoutesBoxes[15].vetX = -1;
+  colisionRoutesBoxes[15].vetY = 0;
+
+  colisionRoutesBoxes[16].x = 300;
+  colisionRoutesBoxes[16].y = 465;
+  colisionRoutesBoxes[16].vetX = -1;
+  colisionRoutesBoxes[16].vetY = 0;
+}
+void setInitialEnemyConfig()
+{
+  for(int index = 0; index < 19; index++)
+  {
+    inimigos[index].PosX = 10000;
+    inimigos[index].PosY = 5000;
+    inimigos[index].isEnabled = false;
+    inimigos[index].vetY = 0;
+    inimigos[index].vetY = 0;
+    inimigos[index].speed = 20;
+  }
+  inimigos[0].PosX = 1000;
+  inimigos[0].PosY = 500;
+  inimigos[0].isEnabled = true;
+  inimigos[0].vetY = -1;
+  inimigos[0].vetX = 0;
+  inimigos[0].speed = 20;
+}
 void startGameConfig()
 {
   gameConfig.isPaused = true;
@@ -85,6 +214,9 @@ void startGameConfig()
   gameConfig.first = TRUE;
   gameConfig.fps = 0.0f;
   gameConfig.index = 0;
+  gameConfig.enemiesIndex = 0;
+  gameConfig.colisionsIndex = 0;
+  gameConfig.enemiesMoveIndex = 0;
 }
 void projectileConfig()
 {
@@ -118,9 +250,6 @@ void setPlayerConfig()
   torres[4].isEnabled = true;
   torres[5].isEnabled = true;
   torres[6].isEnabled = true;
-
-  inimigos[0].PosX = 420;
-  inimigos[0].PosY = 320;
 
 }
 
@@ -255,6 +384,8 @@ void imagesRenderer()
   TamP[1] = imagesize(0, 0, 649, 479);
   TamP[2] = imagesize(0,0,1279,719);
   TamP[3] = imagesize(0,0,48,69);
+  TamP[4] = imagesize(0,0,25,25);
+
   readimagefile("mainScene.bmp",0 , 0 , 1279, 719); // carrega a imagem
   imagens[2] = (unsigned char *)malloc(TamP[2]);
   mascaras[2] = (unsigned char *)malloc(TamP[2]);
@@ -282,6 +413,13 @@ void imagesRenderer()
   getimage(0, 0, 48, 69, imagens[3]); // captura para o ponteiro P
   getimage(0, 0, 48, 69, mascaras[3]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[3],imagens[3],mascaras[3]);
+
+  readimagefile("colisionRect.bmp",0 , 0 , 25, 25); // carrega a imagem
+  imagens[4] = (unsigned char *)malloc(TamP[4]);
+  mascaras[4] = (unsigned char *)malloc(TamP[4]);
+  getimage(0, 0, 48, 69, imagens[4]); // captura para o ponteiro P
+  getimage(0, 0, 48, 69, mascaras[4]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[4],imagens[4],mascaras[4]);
 
   cleardevice();// limpa a tela
 }
@@ -381,7 +519,43 @@ void putImages()
   torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, imagens[0], OR_PUT) : nothing();
   inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, mascaras[3],AND_PUT) : nothing();
   inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[3], OR_PUT) : nothing();
+  putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, imagens[4] , OR_PUT);
+  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[4],AND_PUT);
+  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, imagens[4] , OR_PUT);
+  setfillstyle(1,BLACK);
   rectangle(10,10,10,10);
+
   if(projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX  > 5000 || projeteis[gameConfig.projectileIndex].x - projeteis[gameConfig.projectileIndex].initX < -600 || projeteis[gameConfig.projectileIndex].y > 1000 || projeteis[gameConfig.projectileIndex].y < -100 )
   {
     projeteis[gameConfig.projectileIndex].isLoaded = false;
@@ -430,7 +604,62 @@ void putImages()
 
 void Colision()
 {
+  printf("colisão rodando %i",gameConfig.enemiesIndex);
+  if(inimigos[gameConfig.enemiesIndex].isEnabled)
+  {
+    if(inimigos[gameConfig.enemiesIndex].PosX > colisionRoutesBoxes[gameConfig.colisionsIndex].x && inimigos[gameConfig.enemiesIndex].PosX < colisionRoutesBoxes[gameConfig.colisionsIndex].x + 26 && inimigos[gameConfig.enemiesIndex].PosY <  colisionRoutesBoxes[gameConfig.colisionsIndex].y && inimigos[gameConfig.enemiesIndex].PosY >  colisionRoutesBoxes[gameConfig.colisionsIndex].y + 26)
+    {
+      inimigos[gameConfig.enemiesIndex].vetX = colisionRoutesBoxes[gameConfig.colisionsIndex].vetX;
+      inimigos[gameConfig.enemiesIndex].vetY = colisionRoutesBoxes[gameConfig.colisionsIndex].vetY;
+      printf("inimigo %i mudou de rumo",gameConfig.enemiesIndex);
+    }
+    gameConfig.enemiesIndex++;
+    if(gameConfig.enemiesIndex == 20)
+    {
+      gameConfig.enemiesIndex = 0;
+      gameConfig.colisionsIndex++;
+      if(gameConfig.colisionsIndex == 17)
+      {
+        gameConfig.colisionsIndex = 0;
+      }
+    }
+  }
+  else
+  {
+    gameConfig.enemiesIndex++;
+    if(gameConfig.enemiesIndex == 20)
+    {
+      gameConfig.enemiesIndex = 0;
+      gameConfig.colisionsIndex++;
+      if(gameConfig.colisionsIndex == 17)
+      {
+        gameConfig.colisionsIndex = 0;
+      }
+    }
+  }
+}
+void MoveTroupes()
+{
+  inimigos[gameConfig.enemiesIndex].PosX += inimigos[gameConfig.enemiesIndex].vetX * inimigos[gameConfig.enemiesIndex].speed;
+  inimigos[gameConfig.enemiesIndex].PosY += inimigos[gameConfig.enemiesIndex].vetY * inimigos[gameConfig.enemiesIndex].speed;
 
+  gameConfig.enemiesMoveIndex++;
+  
+  if(gameConfig.enemiesMoveIndex == 20)
+  {
+    gameConfig.enemiesMoveIndex = 0;
+  }
+  
+}
+void EnemySpawn()
+{
+  if(!inimigos[0].isEnabled)
+  {
+    inimigos[0].isEnabled = true;
+    inimigos[0].PosX = 100;
+    inimigos[0].PosY = 300;
+  }
+  
 }
 
 int main()  
@@ -440,6 +669,8 @@ int main()
   initwindow(gameConfig.resolution[0], gameConfig.resolution[1]);	
   setPlayerConfig();
   imagesRenderer();
+  setInitialEnemyConfig();
+  setRoutesConfig();
   backgroundConfig();
   projectileConfig();
   while(1)
@@ -447,9 +678,9 @@ int main()
 
     if (gameConfig.first)
     {
-        gameConfig.frames = 0;
-        gameConfig.starttime = gameConfig.timePassed;
-        gameConfig.first = FALSE;
+      gameConfig.frames = 0;
+      gameConfig.starttime = gameConfig.timePassed;
+      gameConfig.first = FALSE;
     }
     //Clock inicial para controle de frame
     globalKeyListener();
@@ -457,15 +688,11 @@ int main()
     {
       if (pg == 1) pg = 2; else pg = 1;
       setactivepage(pg);
-      cleardevice();    
-      putImages();
+      cleardevice();
+      putImages();    
       Move();
-      putImages(); 
+      MoveTroupes();
       Colision();
-      putImages();
-      // MoveTroupes();
-      // StateCheck(personagem1.direction);
-      putImages();
       setvisualpage(pg);
     }
     if(gameConfig.isPaused)
@@ -492,14 +719,12 @@ int main()
     gameConfig.frames++;
     if (gameConfig.timePassed - gameConfig.starttime > 0.25 && gameConfig.frames > 10)
     {
-        gameConfig.fps = (double) gameConfig.frames / (gameConfig.timePassed - gameConfig.starttime);
-        gameConfig.starttime = gameConfig.timePassed;
-        gameConfig.frames = 0;
+      gameConfig.fps = (double) gameConfig.frames / (gameConfig.timePassed - gameConfig.starttime);
+      gameConfig.starttime = gameConfig.timePassed;
+      gameConfig.frames = 0;
     }
     delay(gameConfig.fps);  
   }
-  
-  
   //while(!kbhit());	
   //closegraph();	
   return 0; 
