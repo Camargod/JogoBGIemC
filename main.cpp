@@ -12,9 +12,9 @@ using namespace std;
 #define ESC    	27
 
 
-unsigned char *imagens[5];
-unsigned char *mascaras[5];
-int TamP[5];
+unsigned char *imagens[10];
+unsigned char *mascaras[10];
+int TamP[10];
 //Aqui está o esquema de camadas para trabalhar com UI
 int layer = 0;
 int blink = 0;
@@ -23,9 +23,9 @@ struct gameConfigurations
 {
   bool isPaused;
   bool inGame;
-  bool money;
-  bool time;
-  bool round;
+  int money;
+  int time;
+  int round;
   int resolution[2];
   int frames;
   double starttime;
@@ -37,6 +37,11 @@ struct gameConfigurations
   int enemiesIndex;
   int enemiesMoveIndex;
   int colisionsIndex;
+  bool inCutscene;
+  bool prep;
+  int scene;
+  bool menu;
+  int select;
 };
 
 int projectileNumber = 0;
@@ -206,17 +211,24 @@ void setInitialEnemyConfig()
 void startGameConfig()
 {
   gameConfig.isPaused = true;
+  gameConfig.inCutscene = true;
   gameConfig.inGame = false;
   gameConfig.resolution[0] = 1280;
   gameConfig.resolution[1] = 720;
   gameConfig.frames = 0;
   gameConfig.starttime = 0;
-  gameConfig.first = TRUE;
+  gameConfig.first = true;
   gameConfig.fps = 0.0f;
   gameConfig.index = 0;
   gameConfig.enemiesIndex = 0;
   gameConfig.colisionsIndex = 0;
   gameConfig.enemiesMoveIndex = 0;
+  gameConfig.money = 100;
+  gameConfig.round = 1;
+  gameConfig.prep = false;
+  gameConfig.scene = 4;
+  gameConfig.menu = false;
+  gameConfig.select = 0;
 }
 void projectileConfig()
 {
@@ -229,28 +241,142 @@ void projectileConfig()
 }
 void setPlayerConfig()
 {
-  torres[0].PosX = 420;
-  torres[0].PosY = 425;
-  torres[1].PosX = 175;
-  torres[1].PosY = 350;
-  torres[2].PosX = 275;
-  torres[2].PosY = 220;
-  torres[3].PosX = 725;
-  torres[3].PosY = 570;
-  torres[4].PosX = 760;
-  torres[4].PosY = 130;
-  torres[5].PosX = 925;
-  torres[5].PosY = 425;
-  torres[6].PosX = 1190;
-  torres[6].PosY = 210;
-  torres[0].isEnabled = true;
-  torres[1].isEnabled = true;
-  torres[2].isEnabled = true;
-  torres[3].isEnabled = true;
-  torres[4].isEnabled = true;
-  torres[5].isEnabled = true;
-  torres[6].isEnabled = true;
+  torres[0].PosX = 410;
+  torres[0].PosY = 415;
+  torres[1].PosX = 165;
+  torres[1].PosY = 345;
+  torres[2].PosX = 265;
+  torres[2].PosY = 215;
+  torres[3].PosX = 715;
+  torres[3].PosY = 560;
+  torres[4].PosX = 750;
+  torres[4].PosY = 120;
+  torres[5].PosX = 915;
+  torres[5].PosY = 415;
+  torres[6].PosX = 1180;
+  torres[6].PosY = 200;
+  torres[0].isEnabled = false;
+  torres[1].isEnabled = false;
+  torres[2].isEnabled = false;
+  torres[3].isEnabled = false;
+  torres[4].isEnabled = false;
+  torres[5].isEnabled = false;
+  torres[6].isEnabled = false;
+}
 
+void escolhendopos(int id, int preco) {
+	POINT mouse2;
+	int pos = GetCursorPos(&mouse2);
+	int posx = mouse2.x;
+	int posy = mouse2.y;
+	putimage(posx, posy, mascaras[id], AND_PUT);
+	putimage(posx, posy, imagens[id], OR_PUT);
+	int cont = 0;
+	
+	// TORRE 1
+	if (posx >= 170 && posx <= 225 && posy <= 395 && posy >= 350 && torres[1].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[1].isEnabled = true;
+    		gameConfig.money -= preco;
+        	mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 2
+	if (posx >= 269 && posx <= 320 && posy <= 262 && posy >= 220 && torres[2].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+	    		torres[2].isEnabled = true;
+	    		gameConfig.money -= preco;
+	    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+	    		gameConfig.select = 0;
+	    	}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 3
+	if (posx >= 413 && posx <= 465 && posy <= 466 && posy >= 420 && torres[0].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[0].isEnabled = true;
+    		gameConfig.money -= preco;
+    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 4
+	if (posx >= 715 && posx <= 768 && posy <= 612 && posy >= 565 && torres[3].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[3].isEnabled = true;
+    		gameConfig.money -= preco;
+    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 5
+	if (posx >= 748 && posx <= 796 && posy <= 170 && posy >= 126 && torres[4].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[4].isEnabled = true;
+    		gameConfig.money -= preco;
+    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 6
+	if (posx >= 919 && posx <= 970 && posy <= 467 && posy >= 422 && torres[5].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[5].isEnabled = true;
+    		gameConfig.money -= preco;
+    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
+	
+	//TORRE 7
+	if (posx >= 1181 && posx <= 1231 && posy <= 248 && posy >= 203 && torres[6].isEnabled == false) {
+		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (gameConfig.money >= preco) {
+    		torres[6].isEnabled = true;
+    		gameConfig.money -= preco;
+    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		gameConfig.select = 0;
+    		}
+	    	else {
+	    		outtextxy(posx,posy-20,"Sem dinheiro suficiente!");
+			}
+		} 
+	}
 }
 
 void backgroundConfig() 
@@ -331,9 +457,9 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
     
     b = pow((projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX),2);
     double hip = sqrt(a + b);
-    printf("Cateto Adjacente do projetil %i : %lf\n",gameConfig.index,a);
-    printf("Cateto Oposto do projetil %i : %lf\n",gameConfig.index,b);
-    printf("Hipotenusa do projetil %i : %lf\n",gameConfig.index,hip);
+    // printf("Cateto Adjacente do projetil %i : %lf\n",gameConfig.index,a);
+    // printf("Cateto Oposto do projetil %i : %lf\n",gameConfig.index,b);
+    // printf("Hipotenusa do projetil %i : %lf\n",gameConfig.index,hip);
     if(b !=0)
     {
       projeteis[gameConfig.index].Xvet =  cos(b /hip);
@@ -350,8 +476,8 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
     {
       projeteis[gameConfig.index].Yvet = 0;
     }
-    printf("Seno do projetil (Yvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
-    printf("Coseno do projetil (Xvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
+    // printf("Seno do projetil (Yvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
+    // printf("Coseno do projetil (Xvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
     projeteis[gameConfig.index].isLoaded = true;
   }
   else
@@ -380,46 +506,79 @@ void Move()
 
 void imagesRenderer()
 {
-  TamP[0] = imagesize(0, 0, 31, 31);
+  TamP[0] = imagesize(0, 0, 60, 60);
   TamP[1] = imagesize(0, 0, 649, 479);
   TamP[2] = imagesize(0,0,1279,719);
   TamP[3] = imagesize(0,0,48,69);
-  TamP[4] = imagesize(0,0,25,25);
+  TamP[4] = imagesize(0,0,1279,719);
+  TamP[5] = imagesize(0,0,1279,719);
+  TamP[6] = imagesize(0,0,1279,719);
+  TamP[7] = imagesize(0,0,100,100);
+  TamP[8] = imagesize(0,0,1279,719);
+  TamP[9] = imagesize(0,0,1279,719);
+  
+  readimagefile("Estilingue.bmp",0 , 0 , 100, 100); // carrega a imagem
+  imagens[7] = (unsigned char *)malloc(TamP[7]);
+  mascaras[7] = (unsigned char *)malloc(TamP[7]);
+  getimage(0, 0, 100, 100, imagens[7]); // captura para o ponteiro P
+  getimage(0, 0, 100, 100, mascaras[7]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[7],imagens[7],mascaras[7]);
+  
+  readimagefile("fundo.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[4] = (unsigned char *)malloc(TamP[4]);
+  mascaras[4] = (unsigned char *)malloc(TamP[4]);
+  getimage(0, 0, 1279, 719, imagens[4]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[4]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[4],imagens[4],mascaras[4]);
+  
+  readimagefile("menu.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[8] = (unsigned char *)malloc(TamP[8]);
+  mascaras[8] = (unsigned char *)malloc(TamP[8]);
+  getimage(0, 0, 1279, 719, imagens[8]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[8]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[8],imagens[8],mascaras[8]);
+  
+  readimagefile("menu2.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[9] = (unsigned char *)malloc(TamP[9]);
+  mascaras[9] = (unsigned char *)malloc(TamP[9]);
+  getimage(0, 0, 1279, 719, imagens[9]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[9]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[9],imagens[9],mascaras[9]);
 
-  readimagefile("mainScene.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  readimagefile("Cenario_MP2.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[6] = (unsigned char *)malloc(TamP[6]);
+  mascaras[6] = (unsigned char *)malloc(TamP[6]);
+  getimage(0, 0, 1279, 719, imagens[6]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[6]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[6],imagens[6],mascaras[6]);
+  
+  readimagefile("Cenario_MP.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[5] = (unsigned char *)malloc(TamP[5]);
+  mascaras[5] = (unsigned char *)malloc(TamP[5]);
+  getimage(0, 0, 1279, 719, imagens[5]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[5]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[5],imagens[5],mascaras[5]);	
+  
+  readimagefile("Cenario_SP.bmp",0 , 0 , 1279, 719); // carrega a imagem
   imagens[2] = (unsigned char *)malloc(TamP[2]);
   mascaras[2] = (unsigned char *)malloc(TamP[2]);
   getimage(0, 0, 1279, 719, imagens[2]); // captura para o ponteiro P
   getimage(0, 0, 1279, 719, mascaras[2]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[2],imagens[2],mascaras[2]);
 
-  readimagefile("Sans.bmp",0 , 0 , 31, 31); // carrega a imagem
+  readimagefile("Estilingue2.bmp",0 , 0 , 60, 60); // carrega a imagem
   imagens[0] = (unsigned char *)malloc(TamP[0]);
   mascaras[0] = (unsigned char *)malloc(TamP[0]);
-  getimage(0, 0, 31, 31, imagens[0]); // captura para o ponteiro P
-  getimage(0, 0, 31, 31, mascaras[0]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  getimage(0, 0, 60, 60, imagens[0]); // captura para o ponteiro P
+  getimage(0, 0, 60, 60, mascaras[0]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[0],imagens[0],mascaras[0]);
 
-  readimagefile("pause.BMP",0 , 0 , 639, 479); // carrega a imagem
-  imagens[1] = (unsigned char *)malloc(TamP[1]);
-  mascaras[1] = (unsigned char *)malloc(TamP[1]);
-  getimage(0, 0, 649, 479, imagens[1]); // captura para o ponteiro P
-  getimage(0, 0, 649, 479, mascaras[1]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[1],imagens[1],mascaras[1]);
-
-  readimagefile("Frisk.bmp",0 , 0 , 48, 69); // carrega a imagem
+  readimagefile("Frisk.bmp", 0, 0, 48, 69); // carrega a imagem
   imagens[3] = (unsigned char *)malloc(TamP[3]);
   mascaras[3] = (unsigned char *)malloc(TamP[3]);
   getimage(0, 0, 48, 69, imagens[3]); // captura para o ponteiro P
   getimage(0, 0, 48, 69, mascaras[3]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[3],imagens[3],mascaras[3]);
-
-  readimagefile("colisionRect.bmp",0 , 0 , 25, 25); // carrega a imagem
-  imagens[4] = (unsigned char *)malloc(TamP[4]);
-  mascaras[4] = (unsigned char *)malloc(TamP[4]);
-  getimage(0, 0, 48, 69, imagens[4]); // captura para o ponteiro P
-  getimage(0, 0, 48, 69, mascaras[4]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[4],imagens[4],mascaras[4]);
 
   cleardevice();// limpa a tela
 }
@@ -447,10 +606,10 @@ void nothing()
 {
 
 }
-void putImages()
+void putImages(int id)
 {
-  putimage(0,0,mascaras[2],AND_PUT);
-  putimage(0,0,imagens[2], OR_PUT);
+  putimage(0,0,mascaras[id],AND_PUT);
+  putimage(0,0,imagens[id], OR_PUT);
 
   setfillstyle(1,RGB(0,0,0));
   projeteis[0].isLoaded ? fillellipse(projeteis[0].x, projeteis[0].y,projeteis[0].size,projeteis[0].size) : nothing();
@@ -519,40 +678,40 @@ void putImages()
   torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, imagens[0], OR_PUT) : nothing();
   inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, mascaras[3],AND_PUT) : nothing();
   inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[3], OR_PUT) : nothing();
-  putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, imagens[4] , OR_PUT);
-  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[4],AND_PUT);
-  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, imagens[4] , OR_PUT);
+  // putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[4],AND_PUT);
+  // putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, imagens[4] , OR_PUT);
   setfillstyle(1,BLACK);
   rectangle(10,10,10,10);
 
@@ -665,6 +824,14 @@ void EnemySpawn()
 int main()  
 { 
   int pg = 1;
+	POINT mouse;
+	int intro = 1;
+	char output[256];
+	GetCursorPos(&mouse);
+	float mousex = mouse.x;
+	float mousey = mouse.y;
+	int posXt = 50;
+	int vel = 0;	
   startGameConfig();
   initwindow(gameConfig.resolution[0], gameConfig.resolution[1]);	
   setPlayerConfig();
@@ -676,54 +843,135 @@ int main()
   while(1)
   {
 
+    settextstyle(6,HORIZ_DIR,12);
+    GetCursorPos(&mouse);
+    mousex = mouse.x;
+    mousey = mouse.y;
     if (gameConfig.first)
     {
-      gameConfig.frames = 0;
-      gameConfig.starttime = gameConfig.timePassed;
-      gameConfig.first = FALSE;
+        gameConfig.frames = 0;
+        gameConfig.starttime = gameConfig.timePassed;
+        gameConfig.first = false;
     }
     //Clock inicial para controle de frame
     globalKeyListener();
-    if(gameConfig.inGame)
-    {
+    
+    //in game
+    if(gameConfig.inGame) {
       if (pg == 1) pg = 2; else pg = 1;
       setactivepage(pg);
-      cleardevice();
-      putImages();    
+      cleardevice();    
+      putImages(gameConfig.scene);
       Move();
-      MoveTroupes();
       Colision();
+      MoveTroupes();
       setvisualpage(pg);
-    }
-    if(gameConfig.isPaused)
+	  
+	  if (gameConfig.inCutscene && gameConfig.prep == false) 
     {
+    	// cutscene (?)
+    	if (intro == 1) mciSendString("play src/Intro.wav", NULL, 0, NULL);
+    	outtextxy(posXt,200,"MONTE SEU EX�RCITO...");
+    	if (posXt <= 150) {
+    		intro = 0;
+    		vel += 6;
+    		posXt += vel;
+		} else {
+			if (vel >= 2) {
+				vel -= 2;
+			} else if (vel < 2) {
+				vel = 2;
+			}
+			posXt += vel;
+		if (posXt >= 520 && gameConfig.select == 0) {
+			sprintf(output,"$ %d", gameConfig.money);
+			if (intro == 0) {
+				mciSendString("open \"./src/sounds/tema.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+        		mciSendString("play mp3 repeat", NULL, 0, NULL);
+				intro = 2;
+			}
+			outtextxy(1185,30,output);
+			posXt = 2000;
+			gameConfig.scene = 5;
+			
+			// checa se o mouse ta sobre o estilingue
+			if ( mousex >= 1061 && mousex <= 1116 && mousey >= 673 && mousey <= 723 ) {
+				gameConfig.scene = 6;
+				outtextxy(mousex,mousey-10,"estilingue $50");
+				if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+					mciSendString("play src/Select.wav", NULL, 0, NULL);
+					gameConfig.select = 1; //seleciona estilingue 
+				}
+			}
+		}
+
+	}
+}}
+    
+    // estilingue selecionado, agr o player escolher a torre
+	if ( gameConfig.select == 1 ) {
+		outtextxy(1185,30,output);
+		gameConfig.scene = 6;
+		escolhendopos(7,50);
+		
+		//caso o player desista da sele��o
+		if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) {
+			mciSendString("play src/Cancel.wav", NULL, 0, NULL);
+			gameConfig.select = 0;
+		}
+	}
+	
+    /*
+	tem algo errado aqui
+	//game menu
+    if(gameConfig.menu) {
+      gameConfig.scene = 8;
+      putimage(0, 0, mascaras[8], AND_PUT);
+      putimage(0, 0, imagens[8], OR_PUT);
+      mciSendString("open \"./src/titulo.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+	  mciSendString("play mp3 repeat", NULL, 0, NULL);
+	  if ( mousex >= 1086 && mousex <= 1266 && mousey >= 562 && mousey <= 405 ) {
+        	gameConfig.scene = 9;
+        	if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+        		gameConfig.inGame = true;
+        		gameConfig.menu = false;
+			}
+		}
+      
+    } */
+    
+    //game paused
+    if(gameConfig.isPaused) {
       if (pg == 1) pg = 2; else pg = 1;
       setactivepage(pg);
       cleardevice(); 
-      putimage(0, 0, mascaras[1], AND_PUT);
-      putimage(0, 0, imagens[1], OR_PUT);
-      if(blink >= 160)
+      putimage(0, 0, mascaras[4], AND_PUT);
+      putimage(0, 0, imagens[4], OR_PUT);
+      if(blink >= 100)
       {
-        outtextxy(300,200,"Tela de pause mesmo rapaz aaaa");
-        if(blink == 320)
+        outtextxy(300,200,"aperta o esc ai");
+        if(blink == 200)
         {
           blink = 0;
         }
       }
-      if(blink <= 320)
+      if(blink <= 200)
       {
         blink++;
       }
       setvisualpage(pg);
     }
+    
     gameConfig.frames++;
+    
+    
     if (gameConfig.timePassed - gameConfig.starttime > 0.25 && gameConfig.frames > 10)
     {
-      gameConfig.fps = (double) gameConfig.frames / (gameConfig.timePassed - gameConfig.starttime);
-      gameConfig.starttime = gameConfig.timePassed;
-      gameConfig.frames = 0;
+        gameConfig.fps = (double) gameConfig.frames / (gameConfig.timePassed - gameConfig.starttime);
+        gameConfig.starttime = gameConfig.timePassed;
+        gameConfig.frames = 0;
     }
-    delay(gameConfig.fps);  
+    delay(gameConfig.fps); 
   }
   //while(!kbhit());	
   //closegraph();	
