@@ -852,7 +852,7 @@ void putImages(int id)
 }
 void TowerColision()
 {
-  if(torres[])
+  if(torres[gameConfig.colisionsIndex])
 }
 
 void MoveTroupes()
@@ -994,7 +994,7 @@ void GlobalIndexMover()
   gameConfig.enemiesMoveIndex++;
   gameConfig.projectileIndex++;
   gameConfig.enemiesIndex++;
-
+  gameConfig.colisionsIndex++;
   if(gameConfig.enemiesIndex == 7)
   {
     gameConfig.enemiesIndex = 0;
@@ -1006,6 +1006,10 @@ void GlobalIndexMover()
   if(gameConfig.projectileIndex == 25)
   {
     gameConfig.projectileIndex = 0;
+  }
+  if(gameConfig.colisionsIndex == 7)
+  {
+    gameConfig.colisionsIndex = 0;
   }
   ProjectileTrigger();
   }
