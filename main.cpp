@@ -36,7 +36,8 @@ struct gameConfigurations
   int projectileIndex;
   int enemiesIndex;
   int enemiesMoveIndex;
-  int colisionsIndex;
+  int towerColisionsIndex[2];
+  int enemyColisionsIndex;
   bool inCutscene;
   bool prep;
   int scene;
@@ -57,6 +58,8 @@ struct torre
   float PosY1;
   char src;
   bool isEnabled;
+  int bulletSpeed;
+  int damage;
 };
 
 struct enemies
@@ -226,6 +229,11 @@ void setInitialEnemyConfig()
     		inimigos[index].vetX = 0;
     		break;
 	  }
+    if(index > 3)
+    {
+      inimigos[index].PosX = 0;
+      inimigos[index].PosY = 0;
+    }
     inimigos[index].isEnabled = true;
     //inimigos[index].vetX = -1;
     //inimigos[index].vetY = 0;
@@ -255,7 +263,8 @@ void startGameConfig()
   gameConfig.fps = 0.0f;
   gameConfig.index = 0;
   gameConfig.enemiesIndex = 0;
-  gameConfig.colisionsIndex = 0;
+  gameConfig.towerColisionsIndex[0] = 0;
+  gameConfig.towerColisionsIndex[1] = 7;
   gameConfig.enemiesMoveIndex = 0;
   gameConfig.money = 100;
   gameConfig.round = 1;
@@ -278,56 +287,63 @@ void projectileConfig()
 }
 
 
-void setPlayerConfig()
+void setTowerConfig()
 {
   torres[0].PosX = 410;
   torres[0].PosY = 415;
-  torres[0].PosX0 = torres[0].PosX - 50;  
-  torres[0].PosY0 = torres[0].PosY - 50;
-  torres[0].PosX1 = torres[0].PosX + 50;  
-  torres[0].PosY1 = torres[0].PosY + 50;
+  torres[0].PosX0 = torres[0].PosX - 200;  
+  torres[0].PosY0 = torres[0].PosY - 200;
+  torres[0].PosX1 = torres[0].PosX + 200;  
+  torres[0].PosY1 = torres[0].PosY + 200;
+  torres[0].bulletSpeed = 30;
 
   torres[1].PosX = 165;
   torres[1].PosY = 345;
-  torres[1].PosX0 = torres[1].PosX - 50;  
-  torres[1].PosY0 = torres[1].PosY - 50;
-  torres[1].PosX1 = torres[1].PosX + 50;  
-  torres[1].PosY1 = torres[1].PosY + 50;
+  torres[1].PosX0 = torres[1].PosX - 200;  
+  torres[1].PosY0 = torres[1].PosY - 200;
+  torres[1].PosX1 = torres[1].PosX + 200;  
+  torres[1].PosY1 = torres[1].PosY + 200;
+  torres[1].bulletSpeed = 30;
 
   torres[2].PosX = 265;
   torres[2].PosY = 215;
-  torres[2].PosX0 = torres[2].PosX - 50;  
-  torres[2].PosY0 = torres[2].PosY - 50;
-  torres[2].PosX1 = torres[2].PosX + 50;  
-  torres[2].PosY1 = torres[2].PosY + 50;
+  torres[2].PosX0 = torres[2].PosX - 200;  
+  torres[2].PosY0 = torres[2].PosY - 200;
+  torres[2].PosX1 = torres[2].PosX + 200;  
+  torres[2].PosY1 = torres[2].PosY + 200;
+  torres[2].bulletSpeed = 30;
 
   torres[3].PosX = 715;
   torres[3].PosY = 560;
-  torres[3].PosX0 = torres[3].PosX - 50;  
-  torres[3].PosY0 = torres[3].PosY - 50;
-  torres[3].PosX1 = torres[3].PosX + 50;  
-  torres[3].PosY1 = torres[3].PosY + 50;
+  torres[3].PosX0 = torres[3].PosX - 200;  
+  torres[3].PosY0 = torres[3].PosY - 200;
+  torres[3].PosX1 = torres[3].PosX + 200;  
+  torres[3].PosY1 = torres[3].PosY + 200;
+  torres[3].bulletSpeed = 30;
 
   torres[4].PosX = 750;
   torres[4].PosY = 120;
-  torres[4].PosX0 = torres[4].PosX - 50;  
-  torres[4].PosY0 = torres[4].PosY - 50;
-  torres[4].PosX1 = torres[4].PosX + 50;  
-  torres[4].PosY1 = torres[4].PosY + 50;
+  torres[4].PosX0 = torres[4].PosX - 200;  
+  torres[4].PosY0 = torres[4].PosY - 200;
+  torres[4].PosX1 = torres[4].PosX + 200;  
+  torres[4].PosY1 = torres[4].PosY + 200;
+  torres[4].bulletSpeed = 30;
 
   torres[5].PosX = 915;
   torres[5].PosY = 415;
-  torres[5].PosX0 = torres[5].PosX - 50;  
-  torres[5].PosY0 = torres[5].PosY - 50;
-  torres[5].PosX1 = torres[5].PosX + 50;  
-  torres[5].PosY1 = torres[5].PosY + 50;
+  torres[5].PosX0 = torres[5].PosX - 200;  
+  torres[5].PosY0 = torres[5].PosY - 200;
+  torres[5].PosX1 = torres[5].PosX + 200;  
+  torres[5].PosY1 = torres[5].PosY + 200;
+  torres[5].bulletSpeed = 30;
 
   torres[6].PosX = 1180;
   torres[6].PosY = 200;
-  torres[6].PosX0 = torres[6].PosX - 50;  
-  torres[6].PosY0 = torres[6].PosY - 50;
-  torres[6].PosX1 = torres[6].PosX + 50;  
-  torres[6].PosY1 = torres[6].PosY + 50;
+  torres[6].PosX0 = torres[6].PosX - 200;  
+  torres[6].PosY0 = torres[6].PosY - 200;
+  torres[6].PosX1 = torres[6].PosX + 200;  
+  torres[6].PosY1 = torres[6].PosY + 200;
+  torres[6].bulletSpeed = 30;
 
   torres[0].isEnabled = false;
   torres[1].isEnabled = false;
@@ -510,58 +526,6 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
     projeteis[gameConfig.index].Xvet = (posInit[0] - posFinal[0]) / 80;
     projeteis[gameConfig.index].Yvet = (posInit[1] - posFinal[1]) / 80;
     projeteis[gameConfig.index].isLoaded = true;
-  //   double a;
-  //   double b;
-  //   if(projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY > 0)
-  //   {
-  //     a = pow((projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY),2);
-  //   }
-  //   if(projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY == 0)
-  //   {
-  //     a = 0;
-  //   }
-  //   if (projeteis[gameConfig.index].initY - projeteis[gameConfig.index].finY < 0)
-  //   {
-  //     a = pow((projeteis[gameConfig.index].finY - projeteis[gameConfig.index].initY),2);
-  //   }
-
-  //   if(projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX > 0)
-  //   {
-  //     b = pow((projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX),2);
-  //   }
-  //   if(projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX == 0)
-  //   {
-  //     b = 0;
-  //   }
-  //   if (projeteis[gameConfig.index].initX - projeteis[gameConfig.index].finX < 0)
-  //   {
-  //     b = pow((projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX),2);
-  //   }
-    
-  //   b = pow((projeteis[gameConfig.index].finX - projeteis[gameConfig.index].initX),2);
-  //   double hip = sqrt(a + b);
-  //   // printf("Cateto Adjacente do projetil %i : %lf\n",gameConfig.index,a);
-  //   // printf("Cateto Oposto do projetil %i : %lf\n",gameConfig.index,b);
-  //   // printf("Hipotenusa do projetil %i : %lf\n",gameConfig.index,hip);
-  //   if(b !=0)
-  //   {
-  //     projeteis[gameConfig.index].Xvet =  cos(b /hip);
-  //   }
-  //   else
-  //   {
-  //     projeteis[gameConfig.index].Xvet = 0;
-  //   }
-  //   if(a !=0)
-  //   {
-  //     projeteis[gameConfig.index].Yvet =  sin(a /hip);
-  //   }
-  //   else
-  //   {
-  //     projeteis[gameConfig.index].Yvet = 0;
-  //   }
-  //   // printf("Seno do projetil (Yvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Yvet);
-  //   // printf("Coseno do projetil (Xvet) %i : %lf\n",gameConfig.index,projeteis[gameConfig.index].Xvet);
-  //   projeteis[gameConfig.index].isLoaded = true;
   }
   else
   {
@@ -609,19 +573,61 @@ void imagesRenderer()
   TamP[11] = imagesize(0,0,100,100);
   TamP[12] = imagesize(0,0,100,100);
   
-  readimagefile("Estilingue.bmp",0 , 0 , 100, 100); // carrega a imagem
-  imagens[7] = (unsigned char *)malloc(TamP[7]);
-  mascaras[7] = (unsigned char *)malloc(TamP[7]);
-  getimage(0, 0, 100, 100, imagens[7]); // captura para o ponteiro P
-  getimage(0, 0, 100, 100, mascaras[7]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[7],imagens[7],mascaras[7]);
-  
+  readimagefile("Estilingue2.bmp",0 , 0 , 60, 60); // carrega a imagem
+  imagens[0] = (unsigned char *)malloc(TamP[0]);
+  mascaras[0] = (unsigned char *)malloc(TamP[0]);
+  getimage(0, 0, 60, 60, imagens[0]); // captura para o ponteiro P
+  getimage(0, 0, 60, 60, mascaras[0]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[0],imagens[0],mascaras[0]);
+
+  readimagefile("pause.BMP",0 , 0 , 639, 479); // carrega a imagem
+  imagens[1] = (unsigned char *)malloc(TamP[1]);
+  mascaras[1] = (unsigned char *)malloc(TamP[1]);
+  getimage(0, 0, 639, 479, imagens[1]); // captura para o ponteiro P
+  getimage(0, 0, 639, 479, mascaras[1]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[1],imagens[1],mascaras[1]);
+
+  readimagefile("Cenario_SP.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[2] = (unsigned char *)malloc(TamP[2]);
+  mascaras[2] = (unsigned char *)malloc(TamP[2]);
+  getimage(0, 0, 1279, 719, imagens[2]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[2]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[2],imagens[2],mascaras[2]);
+
+  readimagefile("SaciT0.bmp", 0, 0, 80, 80); // carrega a imagem
+  imagens[3] = (unsigned char *)malloc(TamP[3]);
+  mascaras[3] = (unsigned char *)malloc(TamP[3]);
+  getimage(0, 0, 80, 80, imagens[3]); // captura para o ponteiro P
+  getimage(0, 0, 80, 80, mascaras[3]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[3],imagens[3],mascaras[3]);
+
   readimagefile("fundo.bmp",0 , 0 , 1279, 719); // carrega a imagem
   imagens[4] = (unsigned char *)malloc(TamP[4]);
   mascaras[4] = (unsigned char *)malloc(TamP[4]);
   getimage(0, 0, 1279, 719, imagens[4]); // captura para o ponteiro P
   getimage(0, 0, 1279, 719, mascaras[4]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[4],imagens[4],mascaras[4]);
+
+  readimagefile("Cenario_MP.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[5] = (unsigned char *)malloc(TamP[5]);
+  mascaras[5] = (unsigned char *)malloc(TamP[5]);
+  getimage(0, 0, 1279, 719, imagens[5]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[5]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[5],imagens[5],mascaras[5]);
+
+  readimagefile("Cenario_MP2.bmp",0 , 0 , 1279, 719); // carrega a imagem
+  imagens[6] = (unsigned char *)malloc(TamP[6]);
+  mascaras[6] = (unsigned char *)malloc(TamP[6]);
+  getimage(0, 0, 1279, 719, imagens[6]); // captura para o ponteiro P
+  getimage(0, 0, 1279, 719, mascaras[6]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[6],imagens[6],mascaras[6]);
+
+  readimagefile("Estilingue.bmp",0 , 0 , 100, 100); // carrega a imagem
+  imagens[7] = (unsigned char *)malloc(TamP[7]);
+  mascaras[7] = (unsigned char *)malloc(TamP[7]);
+  getimage(0, 0, 100, 100, imagens[7]); // captura para o ponteiro P
+  getimage(0, 0, 100, 100, mascaras[7]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
+  ImageConfig(TamP[7],imagens[7],mascaras[7]);
   
   readimagefile("menu.bmp",0 , 0 , 1279, 719); // carrega a imagem
   imagens[8] = (unsigned char *)malloc(TamP[8]);
@@ -644,48 +650,6 @@ void imagesRenderer()
   getimage(0, 0, 1279, 719, mascaras[10]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[10],imagens[10],mascaras[10]);
   
-  readimagefile("Cenario_MP2.bmp",0 , 0 , 1279, 719); // carrega a imagem
-  imagens[6] = (unsigned char *)malloc(TamP[6]);
-  mascaras[6] = (unsigned char *)malloc(TamP[6]);
-  getimage(0, 0, 1279, 719, imagens[6]); // captura para o ponteiro P
-  getimage(0, 0, 1279, 719, mascaras[6]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[6],imagens[6],mascaras[6]);
-  
-  readimagefile("Cenario_MP.bmp",0 , 0 , 1279, 719); // carrega a imagem
-  imagens[5] = (unsigned char *)malloc(TamP[5]);
-  mascaras[5] = (unsigned char *)malloc(TamP[5]);
-  getimage(0, 0, 1279, 719, imagens[5]); // captura para o ponteiro P
-  getimage(0, 0, 1279, 719, mascaras[5]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[5],imagens[5],mascaras[5]);
-  
-  readimagefile("Cenario_SP.bmp",0 , 0 , 1279, 719); // carrega a imagem
-  imagens[2] = (unsigned char *)malloc(TamP[2]);
-  mascaras[2] = (unsigned char *)malloc(TamP[2]);
-  getimage(0, 0, 1279, 719, imagens[2]); // captura para o ponteiro P
-  getimage(0, 0, 1279, 719, mascaras[2]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[2],imagens[2],mascaras[2]);
-
-  readimagefile("Estilingue2.bmp",0 , 0 , 60, 60); // carrega a imagem
-  imagens[0] = (unsigned char *)malloc(TamP[0]);
-  mascaras[0] = (unsigned char *)malloc(TamP[0]);
-  getimage(0, 0, 60, 60, imagens[0]); // captura para o ponteiro P
-  getimage(0, 0, 60, 60, mascaras[0]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[0],imagens[0],mascaras[0]);
-
-  readimagefile("pause.BMP",0 , 0 , 639, 479); // carrega a imagem
-  imagens[1] = (unsigned char *)malloc(TamP[1]);
-  mascaras[1] = (unsigned char *)malloc(TamP[1]);
-  getimage(0, 0, 639, 479, imagens[1]); // captura para o ponteiro P
-  getimage(0, 0, 639, 479, mascaras[1]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[1],imagens[1],mascaras[1]);
-
-  readimagefile("SaciT0.bmp", 0, 0, 80, 80); // carrega a imagem
-  imagens[3] = (unsigned char *)malloc(TamP[3]);
-  mascaras[3] = (unsigned char *)malloc(TamP[3]);
-  getimage(0, 0, 80, 80, imagens[3]); // captura para o ponteiro P
-  getimage(0, 0, 80, 80, mascaras[3]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
-  ImageConfig(TamP[3],imagens[3],mascaras[3]);
-  
   readimagefile("a.bmp", 0, 0, 100, 100); // carrega a imagem
   imagens[11] = (unsigned char *)malloc(TamP[11]);
   mascaras[11] = (unsigned char *)malloc(TamP[11]);
@@ -699,8 +663,7 @@ void imagesRenderer()
   getimage(0, 0, 100, 100, imagens[12]); // captura para o ponteiro P
   getimage(0, 0, 100, 100, mascaras[12]); // captura para a m�scara M (a mesma imagem de P, que depois ser� manipulada na rotina PreparaImg)
   ImageConfig(TamP[12],imagens[12],mascaras[12]);
-  
-  
+   
   cleardevice();// limpa a tela
   
   
@@ -852,7 +815,71 @@ void putImages(int id)
 }
 void TowerColision()
 {
-  if(torres[gameConfig.colisionsIndex])
+  if(torres[gameConfig.towerColisionsIndex[0]].isEnabled)
+  {
+     if(inimigos[gameConfig.enemyColisionsIndex].PosX >= torres[gameConfig.towerColisionsIndex[0]].PosX0 &&
+     inimigos[gameConfig.enemyColisionsIndex].PosX <= torres[gameConfig.towerColisionsIndex[0]].PosX1 &&
+     inimigos[gameConfig.enemyColisionsIndex].PosY >= torres[gameConfig.towerColisionsIndex[0]].PosY0 &&
+     inimigos[gameConfig.enemyColisionsIndex].PosY <= torres[gameConfig.towerColisionsIndex[0]].PosY1)
+    {
+      int posIni[2];
+      int posFin[2];
+      posIni[0] = torres[gameConfig.towerColisionsIndex[0]].PosX;
+      posIni[1] = torres[gameConfig.towerColisionsIndex[0]].PosY;
+      posFin[0] = inimigos[gameConfig.enemyColisionsIndex].PosX;
+      posFin[1] = inimigos[gameConfig.enemyColisionsIndex].PosY;
+      shoot(posIni, posFin,torres[gameConfig.towerColisionsIndex[0]].bulletSpeed);
+    }
+  }
+ 
+  if(torres[gameConfig.towerColisionsIndex[1]].isEnabled)
+  {
+    if(inimigos[gameConfig.enemyColisionsIndex].PosX >= torres[gameConfig.towerColisionsIndex[1]].PosX0 &&
+      inimigos[gameConfig.enemyColisionsIndex].PosX <= torres[gameConfig.towerColisionsIndex[1]].PosX1 &&
+      inimigos[gameConfig.enemyColisionsIndex].PosY >= torres[gameConfig.towerColisionsIndex[1]].PosY0 &&
+      inimigos[gameConfig.enemyColisionsIndex].PosY <= torres[gameConfig.towerColisionsIndex[1]].PosY1)
+    {
+      int posIni[2];
+      int posFin[2];
+      posIni[0] = torres[gameConfig.towerColisionsIndex[1]].PosX;
+      posIni[1] = torres[gameConfig.towerColisionsIndex[1]].PosY;
+      posFin[0] = inimigos[gameConfig.enemyColisionsIndex].PosX;
+      posFin[1] = inimigos[gameConfig.enemyColisionsIndex].PosY;
+      shoot(posIni, posFin, torres[gameConfig.towerColisionsIndex[1]].bulletSpeed);
+    }
+    // trecho para debugar o codigo acima :)
+    // printf("\n");
+    // printf("primeiro passo, X0 (torre %i): %f, X (inimigo %i): %f \n", gameConfig.towerColisionsIndex[1] ,torres[gameConfig.towerColisionsIndex[1]].PosX0, gameConfig.enemyColisionsIndex ,inimigos[gameConfig.enemyColisionsIndex].PosX);
+    // if(inimigos[gameConfig.enemyColisionsIndex].PosX >= torres[gameConfig.towerColisionsIndex[1]].PosX0)
+    // {
+    //   printf("bate aqui, camada 1\n");
+    //   printf("\n");
+    //   printf("segundo passo, X1 (torre %i): %f, X (inimigo %i): %f \n", gameConfig.towerColisionsIndex[1] ,torres[gameConfig.towerColisionsIndex[1]].PosX1, gameConfig.enemyColisionsIndex ,inimigos[gameConfig.enemyColisionsIndex].PosX);
+    //   if(inimigos[gameConfig.enemyColisionsIndex].PosX <= torres[gameConfig.towerColisionsIndex[1]].PosX1)
+    //   {
+    //     printf("bate aqui, camada 2\n");
+    //     printf("\n");
+    //     printf("terceiro passo, Y0 (torre %i): %f, Y (inimigo %i): %f \n", gameConfig.towerColisionsIndex[1] ,torres[gameConfig.towerColisionsIndex[1]].PosY0, gameConfig.enemyColisionsIndex ,inimigos[gameConfig.enemyColisionsIndex].PosY);
+    //     if(inimigos[gameConfig.enemyColisionsIndex].PosY >= torres[gameConfig.towerColisionsIndex[1]].PosY0)
+    //     {
+    //       printf("bate aqui, camada 3\n");
+    //       printf("\n");
+    //       printf("quarto passo, Y1 (torre %i): %f, X (inimigo %i): %f \n", gameConfig.towerColisionsIndex[1] ,torres[gameConfig.towerColisionsIndex[1]].PosY1, gameConfig.enemyColisionsIndex ,inimigos[gameConfig.enemyColisionsIndex].PosY);
+    //       if(inimigos[gameConfig.enemyColisionsIndex].PosY <= torres[gameConfig.towerColisionsIndex[1]].PosY1)
+    //       {
+    //         printf("bate aqui, camada 4");
+    //         int posIni[2];
+    //         int posFin[2];
+    //         posIni[0] = torres[gameConfig.towerColisionsIndex[1]].PosX;
+    //         posIni[1] = torres[gameConfig.towerColisionsIndex[1]].PosY;
+    //         posFin[0] = inimigos[gameConfig.enemyColisionsIndex].PosX;
+    //         posFin[1] = inimigos[gameConfig.enemyColisionsIndex].PosY;
+    //         shoot(posIni, posFin, torres[gameConfig.towerColisionsIndex[1]].bulletSpeed);
+    //       }
+    //     }
+    //   }
+    // }
+  }
 }
 
 void MoveTroupes()
@@ -973,10 +1000,14 @@ void EnemySpawn()
 
 void ProjectileTrigger()
 {
-if(projeteis[gameConfig.projectileIndex].x > 1400 || 
+  if(projeteis[gameConfig.projectileIndex].x > 1400 || 
      projeteis[gameConfig.projectileIndex].x < -100 || 
      projeteis[gameConfig.projectileIndex].y > 1000 || 
-     projeteis[gameConfig.projectileIndex].y < -100)
+     projeteis[gameConfig.projectileIndex].y < -100 ||
+     projeteis[gameConfig.projectileIndex].initX - projeteis[gameConfig.projectileIndex].x >  300 ||
+     projeteis[gameConfig.projectileIndex].initX - projeteis[gameConfig.projectileIndex].x < -300 ||
+     projeteis[gameConfig.projectileIndex].initY - projeteis[gameConfig.projectileIndex].y >  300 ||
+     projeteis[gameConfig.projectileIndex].initY - projeteis[gameConfig.projectileIndex].y < -300)
   {
     projeteis[gameConfig.projectileIndex].isLoaded = false;
   }
@@ -991,29 +1022,38 @@ void GlobalIndexMover()
 {
   if(gameConfig.inGame && !gameConfig.inCutscene)
   {
-  gameConfig.enemiesMoveIndex++;
-  gameConfig.projectileIndex++;
-  gameConfig.enemiesIndex++;
-  gameConfig.colisionsIndex++;
-  if(gameConfig.enemiesIndex == 7)
-  {
-    gameConfig.enemiesIndex = 0;
-  }  
-  if(gameConfig.enemiesMoveIndex == 7)
-  {
-    gameConfig.enemiesMoveIndex = 0;
+    gameConfig.enemiesMoveIndex++;
+    gameConfig.projectileIndex++;
+    gameConfig.enemiesIndex++;
+    gameConfig.enemyColisionsIndex++;
+    if(gameConfig.enemiesIndex == 7)
+    {
+      gameConfig.enemiesIndex = 0;
+    }  
+    if(gameConfig.enemiesMoveIndex == 7)
+    {
+      gameConfig.enemiesMoveIndex = 0;
+    }
+    if(gameConfig.projectileIndex == 25)
+    {
+      gameConfig.projectileIndex = 0;
+    }
+    if(gameConfig.enemyColisionsIndex == 3)
+    {
+      gameConfig.enemyColisionsIndex = 0;
+      gameConfig.towerColisionsIndex[0]++;
+      gameConfig.towerColisionsIndex[1]--;
+    }
+    if(gameConfig.towerColisionsIndex[0] == 7)
+    {
+      gameConfig.towerColisionsIndex[0] = 0;
+    }
+    if(gameConfig.towerColisionsIndex[1] == 0)
+    {
+      gameConfig.towerColisionsIndex[1] = 7;
+    }
+    ProjectileTrigger();
   }
-  if(gameConfig.projectileIndex == 25)
-  {
-    gameConfig.projectileIndex = 0;
-  }
-  if(gameConfig.colisionsIndex == 7)
-  {
-    gameConfig.colisionsIndex = 0;
-  }
-  ProjectileTrigger();
-  }
-  
 }
 
 int main()  
@@ -1031,7 +1071,7 @@ int main()
 	startGameConfig();
 	initwindow(gameConfig.resolution[0], gameConfig.resolution[1]);	
 	imagesRenderer();
-	setPlayerConfig();
+	setTowerConfig();
 	setRoutesConfig();
 	backgroundConfig();
 	projectileConfig();
@@ -1144,7 +1184,7 @@ int main()
     {
 			gameConfig.scene = 2; 
 			MoveTroupes();
-			Colision();
+			TowerColision();
       Move();
 		}
 	}
