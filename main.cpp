@@ -38,12 +38,17 @@ struct gameConfigurations
   int enemiesMoveIndex;
   int towerColisionsIndex[2];
   int enemyColisionsIndex;
+  int projectileColisionsIndex;
   bool inCutscene;
   bool prep;
   int scene;
   bool menu;
   int select;
   int horda;
+  int intro;
+	char output[256];
+  float mousex;
+  float mousey;
 };
 
 int projectileNumber = 0;
@@ -71,9 +76,10 @@ struct enemies
   bool isEnabled;
   float vetX;
   float vetY;
-  float speed = 10;
+  float speed = 2;
   const char * graphics;
   int life;
+  int damage;
 };
 
 struct projectile
@@ -89,8 +95,14 @@ struct projectile
   double finY;
   double Xvet;
   double Yvet;
+  int damage;
 };
 
+struct intro
+{
+  int posXt;
+  int vel;
+};
 struct colisionRoutes
 {
   int x;
@@ -104,6 +116,13 @@ struct torre torres[7];
 struct enemies inimigos[20]; 
 struct projectile projeteis[100];
 struct colisionRoutes colisionRoutesBoxes[17];
+struct intro gameIntro;
+
+void introConfig()
+{
+  gameIntro.posXt = 50;
+  gameIntro.vel = 0;
+}
 
 void setRoutesConfig()
 {
@@ -209,36 +228,38 @@ void setInitialEnemyConfig()
 	int dist = 0;
   for(int index = 1; index < 7; index++)
   {
+    dist += rand() % 80 + 120;
   	switch (index) {
   		case 1:
 		  inimigos[index].PosX = 1320 + dist;
 		  inimigos[index].PosY = 540;
 		  inimigos[index].vetX = -1;
 		  inimigos[index].vetY = 0;
+      inimigos[index].life = 80;
+      inimigos[index].isEnabled = true;
 		  break;
 		case 2:
 			inimigos[index].PosX = 770;
     		inimigos[index].PosY = 706 + dist;
     		inimigos[index].vetY = -1;
     		inimigos[index].vetX = 0;
+        inimigos[index].life = 80;
+        inimigos[index].isEnabled = true;
     		break;
     	case 3:
     		inimigos[index].PosX = 500;
     		inimigos[index].PosY = -180 - dist;
     		inimigos[index].vetY = 1;
     		inimigos[index].vetX = 0;
-    		break;
+        inimigos[index].life = 80;
+        inimigos[index].isEnabled = true;
+    		break;  
 	  }
-    if(index > 3)
-    {
-      inimigos[index].PosX = 0;
-      inimigos[index].PosY = 0;
-    }
-    inimigos[index].isEnabled = true;
+    
     //inimigos[index].vetX = -1;
     //inimigos[index].vetY = 0;
-    inimigos[index].speed = 20;
-    dist += rand() % 80 + 120;
+    inimigos[index].speed = 4;
+    inimigos[index].life = 80;
   }
   
   inimigos[0].PosX = 770;
@@ -246,7 +267,9 @@ void setInitialEnemyConfig()
   inimigos[0].isEnabled = true;
   inimigos[0].vetY = -1;
   inimigos[0].vetX = 0;
-  inimigos[0].speed = 20;
+  inimigos[0].speed = 4;
+  inimigos[0].life = 80;
+
 }
 
 
@@ -266,13 +289,14 @@ void startGameConfig()
   gameConfig.towerColisionsIndex[0] = 0;
   gameConfig.towerColisionsIndex[1] = 7;
   gameConfig.enemiesMoveIndex = 0;
-  gameConfig.money = 100;
+  gameConfig.money = 300;
   gameConfig.round = 1;
   gameConfig.prep = false;
   gameConfig.scene = 4;
   gameConfig.menu = true;
   gameConfig.select = 0;
   gameConfig.horda = 0;
+  gameConfig.projectileColisionsIndex = 0;
 }
 
 
@@ -296,6 +320,7 @@ void setTowerConfig()
   torres[0].PosX1 = torres[0].PosX + 200;  
   torres[0].PosY1 = torres[0].PosY + 200;
   torres[0].bulletSpeed = 30;
+  torres[0].damage = 30;
 
   torres[1].PosX = 165;
   torres[1].PosY = 345;
@@ -304,6 +329,7 @@ void setTowerConfig()
   torres[1].PosX1 = torres[1].PosX + 200;  
   torres[1].PosY1 = torres[1].PosY + 200;
   torres[1].bulletSpeed = 30;
+  torres[1].damage = 30;
 
   torres[2].PosX = 265;
   torres[2].PosY = 215;
@@ -312,6 +338,7 @@ void setTowerConfig()
   torres[2].PosX1 = torres[2].PosX + 200;  
   torres[2].PosY1 = torres[2].PosY + 200;
   torres[2].bulletSpeed = 30;
+  torres[2].damage = 30;
 
   torres[3].PosX = 715;
   torres[3].PosY = 560;
@@ -320,6 +347,7 @@ void setTowerConfig()
   torres[3].PosX1 = torres[3].PosX + 200;  
   torres[3].PosY1 = torres[3].PosY + 200;
   torres[3].bulletSpeed = 30;
+  torres[3].damage = 30;
 
   torres[4].PosX = 750;
   torres[4].PosY = 120;
@@ -328,6 +356,7 @@ void setTowerConfig()
   torres[4].PosX1 = torres[4].PosX + 200;  
   torres[4].PosY1 = torres[4].PosY + 200;
   torres[4].bulletSpeed = 30;
+  torres[4].damage = 30;
 
   torres[5].PosX = 915;
   torres[5].PosY = 415;
@@ -336,6 +365,7 @@ void setTowerConfig()
   torres[5].PosX1 = torres[5].PosX + 200;  
   torres[5].PosY1 = torres[5].PosY + 200;
   torres[5].bulletSpeed = 30;
+  torres[5].damage = 30;
 
   torres[6].PosX = 1180;
   torres[6].PosY = 200;
@@ -344,6 +374,7 @@ void setTowerConfig()
   torres[6].PosX1 = torres[6].PosX + 200;  
   torres[6].PosY1 = torres[6].PosY + 200;
   torres[6].bulletSpeed = 30;
+  torres[6].damage = 30;
 
   torres[0].isEnabled = false;
   torres[1].isEnabled = false;
@@ -474,11 +505,6 @@ void escolhendopos(int id, int preco) {
 	}
 }
 
-void backgroundConfig() 
-{
-	setbkcolor(RGB(70, 170, 70));
-}
-
 void ImageConfig(int Tam, unsigned char *Img, unsigned char *Msk) 
 {
 // Tam ? o tamanho dos ponteiros da imagem e da m?scara
@@ -509,8 +535,8 @@ void ImageConfig(int Tam, unsigned char *Img, unsigned char *Msk)
   }
 }
 
-#pragma region Mec�ncia de cordenada de tiro
-void shoot(int posInit[2], int posFinal[2], int structureSpeed)
+#pragma region Mecancia de cordenada de tiro
+void shoot(int posInit[2], int posFinal[2], int structureSpeed, int damage)
 {
   if(!projeteis[gameConfig.index].isLoaded)
   {
@@ -522,6 +548,7 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
     projeteis[gameConfig.index].initY = posInit[1];
     projeteis[gameConfig.index].finX = posFinal[0];
     projeteis[gameConfig.index].finY = posFinal[1];
+    projeteis[gameConfig.index].damage = damage;
 
     projeteis[gameConfig.index].Xvet = (posInit[0] - posFinal[0]) / 80;
     projeteis[gameConfig.index].Yvet = (posInit[1] - posFinal[1]) / 80;
@@ -539,21 +566,21 @@ void shoot(int posInit[2], int posFinal[2], int structureSpeed)
 
 
 
-#pragma endregion
-void Move()
-{
-  if(GetKeyState(VK_UP)&0x80)
-  {
-    int posIni[2];
-    posIni[0] = torres[0].PosX;
-    posIni[1] = torres[0].PosY;
-    int posFinal[2];
-    posFinal[0] = inimigos[0].PosX;
-    posFinal[1] = inimigos[0].PosY;
+// #pragma endregion
+// void Move()
+// {
+//   if(GetKeyState(VK_UP)&0x80)
+//   {
+//     int posIni[2];
+//     posIni[0] = torres[0].PosX;
+//     posIni[1] = torres[0].PosY;
+//     int posFinal[2];
+//     posFinal[0] = inimigos[0].PosX;
+//     posFinal[1] = inimigos[0].PosY;
 
-    shoot(posIni,posFinal,25);
-	}
-}
+//     shoot(posIni,posFinal,25);
+// 	}
+// }
 
 
 
@@ -752,26 +779,26 @@ void putImages(int id)
   // projeteis[48].isLoaded ? fillellipse(projeteis[48].x, projeteis[48].y,projeteis[48].size,projeteis[48].size) : nothing();
   // projeteis[49].isLoaded ? fillellipse(projeteis[49].x, projeteis[49].y,projeteis[49].size,projeteis[49].size) : nothing();
   torres[0].isEnabled ? putimage(torres[0].PosX, torres[0].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[0].isEnabled ? putimage(torres[0].PosX, torres[0].PosY, imagens[0], OR_PUT) : nothing();
+  torres[0].isEnabled ? putimage(torres[0].PosX, torres[0].PosY, imagens[0], OR_PUT)  : nothing();
   torres[1].isEnabled ? putimage(torres[1].PosX, torres[1].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[1].isEnabled ? putimage(torres[1].PosX, torres[1].PosY, imagens[0], OR_PUT) : nothing();
+  torres[1].isEnabled ? putimage(torres[1].PosX, torres[1].PosY, imagens[0], OR_PUT)  : nothing();
   torres[2].isEnabled ? putimage(torres[2].PosX, torres[2].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[2].isEnabled ? putimage(torres[2].PosX, torres[2].PosY, imagens[0], OR_PUT) : nothing();
+  torres[2].isEnabled ? putimage(torres[2].PosX, torres[2].PosY, imagens[0], OR_PUT)  : nothing();
   torres[3].isEnabled ? putimage(torres[3].PosX, torres[3].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[3].isEnabled ? putimage(torres[3].PosX, torres[3].PosY, imagens[0], OR_PUT) : nothing();
+  torres[3].isEnabled ? putimage(torres[3].PosX, torres[3].PosY, imagens[0], OR_PUT)  : nothing();
   torres[4].isEnabled ? putimage(torres[4].PosX, torres[4].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[4].isEnabled ? putimage(torres[4].PosX, torres[4].PosY, imagens[0], OR_PUT) : nothing();
+  torres[4].isEnabled ? putimage(torres[4].PosX, torres[4].PosY, imagens[0], OR_PUT)  : nothing();
   torres[5].isEnabled ? putimage(torres[5].PosX, torres[5].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[5].isEnabled ? putimage(torres[5].PosX, torres[5].PosY, imagens[0], OR_PUT) : nothing();
+  torres[5].isEnabled ? putimage(torres[5].PosX, torres[5].PosY, imagens[0], OR_PUT)  : nothing();
   torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, mascaras[0],AND_PUT) : nothing();
-  torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, imagens[0], OR_PUT) : nothing();
+  torres[6].isEnabled ? putimage(torres[6].PosX, torres[6].PosY, imagens[0], OR_PUT)  : nothing();
   inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, mascaras[3],AND_PUT) : nothing();
-  inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[3], OR_PUT) : nothing();
+  inimigos[0].isEnabled ? putimage(inimigos[0].PosX, inimigos[0].PosY, imagens[3], OR_PUT)  : nothing();
   inimigos[1].isEnabled ? putimage(inimigos[1].PosX, inimigos[1].PosY, mascaras[3],AND_PUT) : nothing();
-  inimigos[1].isEnabled ? putimage(inimigos[1].PosX, inimigos[1].PosY, imagens[3], OR_PUT) : nothing();
+  inimigos[1].isEnabled ? putimage(inimigos[1].PosX, inimigos[1].PosY, imagens[3], OR_PUT)  : nothing();
   inimigos[2].isEnabled ? putimage(inimigos[2].PosX, inimigos[2].PosY, mascaras[3],AND_PUT) : nothing();
-  inimigos[2].isEnabled ? putimage(inimigos[2].PosX, inimigos[2].PosY, imagens[3], OR_PUT) : nothing();
-  inimigos[3].isEnabled ? putimage(inimigos[3].PosX, inimigos[3].PosY, mascaras[12],AND_PUT) : nothing();
+  inimigos[2].isEnabled ? putimage(inimigos[2].PosX, inimigos[2].PosY, imagens[3], OR_PUT)  : nothing();
+  inimigos[3].isEnabled ? putimage(inimigos[3].PosX, inimigos[3].PosY, mascaras[12],AND_PUT): nothing();
   inimigos[3].isEnabled ? putimage(inimigos[3].PosX, inimigos[3].PosY, imagens[12], OR_PUT) : nothing();
   
   /*putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[12],AND_PUT);
@@ -808,8 +835,6 @@ void putImages(int id)
   putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, imagens[12] , OR_PUT);
   putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[12],AND_PUT);
   putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, imagens[12] , OR_PUT);*/
-  
-  
   setfillstyle(1,BLACK);
   rectangle(10,10,10,10);
 }
@@ -828,7 +853,7 @@ void TowerColision()
       posIni[1] = torres[gameConfig.towerColisionsIndex[0]].PosY;
       posFin[0] = inimigos[gameConfig.enemyColisionsIndex].PosX;
       posFin[1] = inimigos[gameConfig.enemyColisionsIndex].PosY;
-      shoot(posIni, posFin,torres[gameConfig.towerColisionsIndex[0]].bulletSpeed);
+      shoot(posIni, posFin,torres[gameConfig.towerColisionsIndex[0]].bulletSpeed,torres[gameConfig.towerColisionsIndex[0]].damage);
     }
   }
  
@@ -845,7 +870,7 @@ void TowerColision()
       posIni[1] = torres[gameConfig.towerColisionsIndex[1]].PosY;
       posFin[0] = inimigos[gameConfig.enemyColisionsIndex].PosX;
       posFin[1] = inimigos[gameConfig.enemyColisionsIndex].PosY;
-      shoot(posIni, posFin, torres[gameConfig.towerColisionsIndex[1]].bulletSpeed);
+      shoot(posIni, posFin, torres[gameConfig.towerColisionsIndex[1]].bulletSpeed,torres[gameConfig.towerColisionsIndex[1]].damage);
     }
     // trecho para debugar o codigo acima :)
     // printf("\n");
@@ -1000,10 +1025,10 @@ void EnemySpawn()
 
 void ProjectileTrigger()
 {
-  if(projeteis[gameConfig.projectileIndex].x > 1400 || 
-     projeteis[gameConfig.projectileIndex].x < -100 || 
-     projeteis[gameConfig.projectileIndex].y > 1000 || 
-     projeteis[gameConfig.projectileIndex].y < -100 ||
+  if(projeteis[gameConfig.projectileIndex].x > 1400                                               || 
+     projeteis[gameConfig.projectileIndex].x < -100                                               || 
+     projeteis[gameConfig.projectileIndex].y > 1000                                               || 
+     projeteis[gameConfig.projectileIndex].y < -100                                               ||
      projeteis[gameConfig.projectileIndex].initX - projeteis[gameConfig.projectileIndex].x >  300 ||
      projeteis[gameConfig.projectileIndex].initX - projeteis[gameConfig.projectileIndex].x < -300 ||
      projeteis[gameConfig.projectileIndex].initY - projeteis[gameConfig.projectileIndex].y >  300 ||
@@ -1018,10 +1043,25 @@ void ProjectileTrigger()
   }
 }
 
+void ProjectileColision()
+{
+  if(projeteis[gameConfig.projectileColisionsIndex].x > inimigos[gameConfig.enemyColisionsIndex].PosX && projeteis[gameConfig.projectileColisionsIndex].x < inimigos[gameConfig.enemyColisionsIndex].PosX + 80 && projeteis[gameConfig.projectileColisionsIndex].y > inimigos[gameConfig.enemyColisionsIndex].PosY && projeteis[gameConfig.projectileColisionsIndex].y < inimigos[gameConfig.enemyColisionsIndex].PosY + 80)
+  {
+    inimigos[gameConfig.enemiesIndex].life -= projeteis[gameConfig.projectileIndex].damage;
+    printf("Inimigo %i com vida de: %i (%i de dano)",gameConfig.enemiesIndex,inimigos[gameConfig.enemiesIndex].life,projeteis[gameConfig.projectileColisionsIndex].damage);
+    if(inimigos[gameConfig.enemiesIndex].life < 0)
+    {
+      inimigos[gameConfig.enemiesIndex].isEnabled = false;
+      gameConfig.money += 30;
+    }
+  }
+}
+
 void GlobalIndexMover()
 {
   if(gameConfig.inGame && !gameConfig.inCutscene)
   {
+    ProjectileTrigger();
     gameConfig.enemiesMoveIndex++;
     gameConfig.projectileIndex++;
     gameConfig.enemiesIndex++;
@@ -1041,6 +1081,7 @@ void GlobalIndexMover()
     if(gameConfig.enemyColisionsIndex == 3)
     {
       gameConfig.enemyColisionsIndex = 0;
+      gameConfig.projectileColisionsIndex++;
       gameConfig.towerColisionsIndex[0]++;
       gameConfig.towerColisionsIndex[1]--;
     }
@@ -1052,180 +1093,185 @@ void GlobalIndexMover()
     {
       gameConfig.towerColisionsIndex[1] = 7;
     }
-    ProjectileTrigger();
+    if(gameConfig.projectileColisionsIndex == 24)
+    {
+      gameConfig.projectileColisionsIndex = 0;
+    }
   }
 }
+void UIRenderer()
+{
+  // cutscene
+  if (gameConfig.inCutscene) 
+  {
+    // cutscene (?)
+    mciSendString("stop menu", NULL, 0, NULL);
+    gameConfig.scene = 4;
+    if (gameConfig.intro == 1)
+    {
+      mciSendString("play src/Intro.wav", NULL, 0, NULL);
+    } 
+    outtextxy(gameIntro.posXt,200,"MONTE SEU EX�RCITO...");
+    if (gameIntro.posXt <= 150) 
+    {
+      gameConfig.intro = 0;
+      gameIntro.vel += 6;
+      gameIntro.posXt += gameIntro.vel;
+    } 
+    else 
+    {
+      if (gameIntro.vel >= 2) 
+      {
+        gameIntro.vel -= 2;
+      } 
+      else if (gameIntro.vel < 2) 
+      {
+        gameIntro.vel = 2;
+      }
+    }
+    gameIntro.posXt += gameIntro.vel;
+    if (gameIntro.posXt >= 400) 
+    {
+      gameConfig.inGame = true;
+      gameConfig.inCutscene = false;
+    }
+	}
 
+  if(gameConfig.inGame && gameConfig.inCutscene == false) 
+  {
+    sprintf(gameConfig.output,"$ %d", gameConfig.money);
+    if (gameConfig.intro == 0) 
+    {
+      mciSendString("open \"./sound/src/tema.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+      mciSendString("play mp3 repeat", NULL, 0, NULL);
+      gameConfig.intro = 2;
+    }
+    gameIntro.posXt = 2000;
+    gameConfig.scene = 5;
+    
+    if (gameConfig.horda == 0) 
+    {
+      outtextxy(1185,615,gameConfig.output);
+      // checa se o mouse ta sobre o estilingue
+      if ( gameConfig.mousex >= 1061 && gameConfig.mousex <= 1116 && gameConfig.mousey >= 673 && gameConfig.mousey <= 723 && gameConfig.select == 0 ) 
+      {
+        gameConfig.scene = 6;
+        outtextxy(gameConfig.mousex,gameConfig.mousey-10,"estilingue $50");
+        if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
+        {
+          mciSendString("play src/Select.wav", NULL, 0, NULL);
+          gameConfig.select = 1; //seleciona estilingue 
+        }
+      }
+    
+      //checa se o estilingue ta selecionado
+      if ( gameConfig.select == 1 ) 
+      {
+        gameConfig.scene = 6;
+        escolhendopos(7,50);
+        
+        //caso o player desista da sele��o
+        if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) 
+        {
+          mciSendString("play src/Cancel.wav", NULL, 0, NULL);
+          gameConfig.select = 0;
+        }
+      }
+    
+      //checa se o mouse t� sobre a seta
+      if (gameConfig.select == 0 && gameConfig.mousex >= 1165 && gameConfig.mousex <= 1270 && gameConfig.mousey >= 11 && gameConfig.mousey <= 102) 
+      {
+        gameConfig.scene = 10;
+        if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
+        { // checa se o player clicou na seta
+          mciSendString("play src/Start.wav", NULL, 0, NULL);
+          Sleep(1000);
+          gameConfig.scene = 5; 
+          setInitialEnemyConfig();
+          gameConfig.horda = 1; // come�a o ataque
+        }
+      }
+	  }
+    if(gameConfig.horda == 1) 
+    {
+      gameConfig.scene = 2; 
+      MoveTroupes();
+      TowerColision();
+    }
+  }
+  if(gameConfig.menu) 
+  {
+	  mciSendString("play menu repeat", NULL, 0, NULL);
+    gameConfig.scene = 8;
+	  if ( gameConfig.mousex >= 1086 && gameConfig.mousex <= 1266 && gameConfig.mousey <= 562 && gameConfig.mousey >= 405 ) 
+    {
+      gameConfig.scene = 9;
+      if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
+      {
+        gameConfig.menu = false;
+        gameConfig.inCutscene = true;
+			}
+		}   
+  }
+      //game paused
+  if(gameConfig.isPaused && gameConfig.inCutscene == false) 
+  {
+    putimage(0, 0, mascaras[4], AND_PUT);
+    putimage(0, 0, imagens[4], OR_PUT);
+    if(blink >= 100)
+    {
+      outtextxy(300,200,"aperta o esc ai");
+      if(blink == 200)
+      {
+        blink = 0;
+      }
+    }
+    if(blink <= 200)
+    {
+      blink++;
+    }
+  }
+}
+void mouseListener(POINT mouse)
+{
+    GetCursorPos(&mouse);
+    gameConfig.mousex = mouse.x;
+    gameConfig.mousey = mouse.y;
+}
 int main()  
 {
 	mciSendString("open \"./src/titulo.mp3\" type mpegvideo alias menu", NULL, 0, NULL);
 	int pg = 1;
 	POINT mouse;
-	int intro = 1;
-	char output[256];
-	GetCursorPos(&mouse);
-	float mousex = mouse.x;
-	float mousey = mouse.y;
-	int posXt = 50;
-	int vel = 0;	
+  gameConfig.intro = 1;
 	startGameConfig();
+  projectileConfig();
+  introConfig();
+  setTowerConfig();
+	setRoutesConfig();
 	initwindow(gameConfig.resolution[0], gameConfig.resolution[1]);	
 	imagesRenderer();
-	setTowerConfig();
-	setRoutesConfig();
-	backgroundConfig();
-	projectileConfig();
-  
+
   while(1)
   {
-    settextstyle(9,HORIZ_DIR,13);
-    GetCursorPos(&mouse);
-    mousex = mouse.x;
-    mousey = mouse.y;
-    if (pg == 1) pg = 2; else pg = 1;
-    setactivepage(pg);
-    cleardevice();    
-    Move();
-    GlobalIndexMover();
-    putImages(gameConfig.scene); 
-    setvisualpage(pg);
     if (gameConfig.first)
     {
       gameConfig.frames = 0;
       gameConfig.starttime = gameConfig.timePassed;
       gameConfig.first = false;
     }
-    //Clock inicial para controle de frame
+    if (pg == 1) pg = 2; else pg = 1;
+    mouseListener(mouse);
+    settextstyle(9,HORIZ_DIR,13);
+    setactivepage(pg);
+    cleardevice();
+    ProjectileColision();
+    putImages(gameConfig.scene);
+    ProjectileTrigger();
     globalKeyListener();
-
-    // cutscene
-    if (gameConfig.inCutscene) 
-    {
-    	// cutscene (?)
-    	mciSendString("stop menu", NULL, 0, NULL);
-    	gameConfig.scene = 4;
-    	if (intro == 1) mciSendString("play src/Intro.wav", NULL, 0, NULL);
-    	outtextxy(posXt,200,"MONTE SEU EX�RCITO...");
-    	if (posXt <= 150) {
-    		intro = 0;
-    		vel += 6;
-    		posXt += vel;
-		} else {
-			if (vel >= 2) {
-				vel -= 2;
-			} else if (vel < 2) {
-				vel = 2;
-			}
-		}
-		posXt += vel;
-		if (posXt >= 400) {
-			gameConfig.inGame = true;
-			gameConfig.inCutscene = false;
-		}
-	}
-    
-    
-    //in game
-    if(gameConfig.inGame && gameConfig.inCutscene == false) 
-    {
-      sprintf(output,"$ %d", gameConfig.money);
-      if (intro == 0) 
-      {
-        mciSendString("open \"./sound/src/tema.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-        mciSendString("play mp3 repeat", NULL, 0, NULL);
-        intro = 2;
-      }
-      posXt = 2000;
-      gameConfig.scene = 5;
-      
-      if (gameConfig.horda == 0) 
-      {
-        outtextxy(1185,615,output);
-        // checa se o mouse ta sobre o estilingue
-        if ( mousex >= 1061 && mousex <= 1116 && mousey >= 673 && mousey <= 723 && gameConfig.select == 0 ) 
-        {
-          gameConfig.scene = 6;
-          outtextxy(mousex,mousey-10,"estilingue $50");
-          if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
-          {
-            mciSendString("play src/Select.wav", NULL, 0, NULL);
-            gameConfig.select = 1; //seleciona estilingue 
-          }
-			  }
-			
-			//checa se o estilingue ta selecionado
-			if ( gameConfig.select == 1 ) {
-				gameConfig.scene = 6;
-				escolhendopos(7,50);
-				
-				//caso o player desista da sele��o
-				if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) {
-					mciSendString("play src/Cancel.wav", NULL, 0, NULL);
-					gameConfig.select = 0;
-				}
-			}
-			
-			//checa se o mouse t� sobre a seta
-			if ( gameConfig.select == 0 && mousex >= 1165 && mousex <= 1270 && mousey >= 11 && mousey <= 102 ) {
-				gameConfig.scene = 10;
-				if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) { // checa se o player clicou na seta
-					mciSendString("play src/Start.wav", NULL, 0, NULL);
-					Sleep(1500);
-					gameConfig.scene = 5; 
-					setInitialEnemyConfig();
-					gameConfig.horda = 1; // come�a o ataque
-				}
-			}
-		}
-	
-	
-	
-		if(gameConfig.horda == 1) 
-    {
-			gameConfig.scene = 2; 
-			MoveTroupes();
-			TowerColision();
-      Move();
-		}
-	}
-	
-
-
-	//game menu
-    if(gameConfig.menu) {
-	mciSendString("play menu repeat", NULL, 0, NULL);
-      gameConfig.scene = 8;
-	  if ( mousex >= 1086 && mousex <= 1266 && mousey <= 562 && mousey >= 405 ) {
-        	gameConfig.scene = 9;
-        	if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
-        		gameConfig.menu = false;
-        		gameConfig.inCutscene = true;
-			}
-		}
-      
-    } 
-    
-    //game paused
-    if(gameConfig.isPaused && gameConfig.inCutscene == false) {
-      if (pg == 1) pg = 2; else pg = 1;
-      setactivepage(pg);
-      cleardevice(); 
-      putimage(0, 0, mascaras[4], AND_PUT);
-      putimage(0, 0, imagens[4], OR_PUT);
-      if(blink >= 100)
-      {
-        outtextxy(300,200,"aperta o esc ai");
-        if(blink == 200)
-        {
-          blink = 0;
-        }
-      }
-      if(blink <= 200)
-      {
-        blink++;
-      }
-      setvisualpage(pg);
-    }
+    UIRenderer();
+    setvisualpage(pg);
+    GlobalIndexMover();
     gameConfig.frames++;
     
     if (gameConfig.timePassed - gameConfig.starttime > 0.25 && gameConfig.frames > 10)
