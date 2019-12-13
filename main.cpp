@@ -401,7 +401,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[1].isEnabled = true;
     		gameConfig.money -= preco;
-        	mciSendString("play src/Buy.wav", NULL, 0, NULL);
+        	mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -419,7 +419,7 @@ void escolhendopos(int id, int preco) {
       {
         torres[2].isEnabled = true;
         gameConfig.money -= preco;
-        mciSendString("play src/Buy.wav", NULL, 0, NULL);
+        mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
         gameConfig.select = 0;
 	    }
 	    else 
@@ -435,7 +435,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[0].isEnabled = true;
     		gameConfig.money -= preco;
-    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -450,7 +450,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[3].isEnabled = true;
     		gameConfig.money -= preco;
-    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -465,7 +465,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[4].isEnabled = true;
     		gameConfig.money -= preco;
-    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -480,7 +480,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[5].isEnabled = true;
     		gameConfig.money -= preco;
-    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -495,7 +495,7 @@ void escolhendopos(int id, int preco) {
 			if (gameConfig.money >= preco) {
     		torres[6].isEnabled = true;
     		gameConfig.money -= preco;
-    		mciSendString("play src/Buy.wav", NULL, 0, NULL);
+    		mciSendString(TEXT("play src/Buy.wav"), NULL, 0, NULL);
     		gameConfig.select = 0;
     		}
 	    	else {
@@ -710,7 +710,7 @@ void globalKeyListener()
       gameConfig.isPaused = !gameConfig.isPaused;
       if(gameConfig.inGame)
       {
-        mciSendString("open \"./src/sounds/tema.mp3\" type mpegvideo alias tema", NULL, 0, NULL);
+        mciSendString(TEXT("open \"./src/sounds/tema.mp3\" type mpegvideo alias tema"), NULL, 0, NULL);
         // mciSendString("play mp3 notify repeat", NULL, 0, 0);
       }
     }
@@ -1049,9 +1049,9 @@ void ProjectileColision()
   {
     inimigos[gameConfig.enemiesIndex].life -= projeteis[gameConfig.projectileIndex].damage;
     printf("Inimigo %i com vida de: %i (%i de dano)",gameConfig.enemiesIndex,inimigos[gameConfig.enemiesIndex].life,projeteis[gameConfig.projectileColisionsIndex].damage);
-    if(inimigos[gameConfig.enemiesIndex].life < 0)
+    if(inimigos[gameConfig.enemyColisionsIndex].life < 0)
     {
-      inimigos[gameConfig.enemiesIndex].isEnabled = false;
+      inimigos[gameConfig.enemyColisionsIndex].isEnabled = false;
       gameConfig.money += 30;
     }
   }
@@ -1105,11 +1105,11 @@ void UIRenderer()
   if (gameConfig.inCutscene) 
   {
     // cutscene (?)
-    mciSendString("stop menu", NULL, 0, NULL);
+    mciSendString(TEXT("stop menu"), NULL, 0, NULL);
     gameConfig.scene = 4;
     if (gameConfig.intro == 1)
     {
-      mciSendString("play src/Intro.wav", NULL, 0, NULL);
+      mciSendString(TEXT("play src/Intro.wav"), NULL, 0, NULL);
     } 
     outtextxy(gameIntro.posXt,200,"MONTE SEU EX�RCITO...");
     if (gameIntro.posXt <= 150) 
@@ -1142,8 +1142,8 @@ void UIRenderer()
     sprintf(gameConfig.output,"$ %d", gameConfig.money);
     if (gameConfig.intro == 0) 
     {
-      mciSendString("open \"./sound/src/tema.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-      mciSendString("play mp3 repeat", NULL, 0, NULL);
+      mciSendString(TEXT("open \"./sound/src/tema.mp3\" type mpegvideo alias mp3"), NULL, 0, NULL);
+      mciSendString(TEXT("play mp3 repeat"), NULL, 0, NULL);
       gameConfig.intro = 2;
     }
     gameIntro.posXt = 2000;
@@ -1159,7 +1159,7 @@ void UIRenderer()
         outtextxy(gameConfig.mousex,gameConfig.mousey-10,"estilingue $50");
         if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
         {
-          mciSendString("play src/Select.wav", NULL, 0, NULL);
+          mciSendString(TEXT("play src/Select.wav"), NULL, 0, NULL);
           gameConfig.select = 1; //seleciona estilingue 
         }
       }
@@ -1173,7 +1173,7 @@ void UIRenderer()
         //caso o player desista da sele��o
         if ((GetKeyState(VK_RBUTTON) & 0x80) != 0) 
         {
-          mciSendString("play src/Cancel.wav", NULL, 0, NULL);
+          mciSendString(TEXT("play src/Cancel.wav"), NULL, 0, NULL);
           gameConfig.select = 0;
         }
       }
@@ -1184,7 +1184,7 @@ void UIRenderer()
         gameConfig.scene = 10;
         if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) 
         { // checa se o player clicou na seta
-          mciSendString("play src/Start.wav", NULL, 0, NULL);
+          mciSendString(TEXT("play src/Start.wav"), NULL, 0, NULL);
           Sleep(1000);
           gameConfig.scene = 5; 
           setInitialEnemyConfig();
@@ -1201,7 +1201,7 @@ void UIRenderer()
   }
   if(gameConfig.menu) 
   {
-	  mciSendString("play menu repeat", NULL, 0, NULL);
+	  mciSendString(TEXT("play menu repeat"), NULL, 0, NULL);
     gameConfig.scene = 8;
 	  if ( gameConfig.mousex >= 1086 && gameConfig.mousex <= 1266 && gameConfig.mousey <= 562 && gameConfig.mousey >= 405 ) 
     {
@@ -1240,7 +1240,7 @@ void mouseListener(POINT mouse)
 }
 int main()  
 {
-	mciSendString("open \"./src/titulo.mp3\" type mpegvideo alias menu", NULL, 0, NULL);
+	mciSendString(TEXT("open \"./src/titulo.mp3\" type mpegvideo alias menu"), NULL, 0, NULL);
 	int pg = 1;
 	POINT mouse;
   gameConfig.intro = 1;
