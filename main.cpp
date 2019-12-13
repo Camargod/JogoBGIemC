@@ -49,6 +49,7 @@ struct gameConfigurations
 	char output[256];
   float mousex;
   float mousey;
+
 };
 
 int projectileNumber = 0;
@@ -118,6 +119,7 @@ struct projectile projeteis[100];
 struct colisionRoutes colisionRoutesBoxes[17];
 struct intro gameIntro;
 
+
 void introConfig()
 {
   gameIntro.posXt = 50;
@@ -186,7 +188,7 @@ void setRoutesConfig()
   colisionRoutesBoxes[9].vetX = 0;
   colisionRoutesBoxes[9].vetY = -1;
 
-  colisionRoutesBoxes[10].x = 1130;
+  colisionRoutesBoxes[10].x = 1106;
   colisionRoutesBoxes[10].y = 570;
   colisionRoutesBoxes[10].vetX = -1;
   colisionRoutesBoxes[10].vetY = 0;
@@ -223,53 +225,65 @@ void setRoutesConfig()
 }
 
 
-void setInitialEnemyConfig()
+void setInitialEnemyConfig(int round)
 {
 	int dist = 0;
-  for(int index = 1; index < 7; index++)
+  if(round == 0)
   {
-    dist += rand() % 80 + 120;
-  	switch (index) {
-  		case 1:
-		  inimigos[index].PosX = 1320 + dist;
-		  inimigos[index].PosY = 540;
-		  inimigos[index].vetX = -1;
-		  inimigos[index].vetY = 0;
+    for(int index = 0; index < 7; index++)
+    {
+      int startRoutesX[5] = {770,1320,500,1100,200};
+      int startRoutesY[5] = {706,540,-180,-180,-180};
+      dist += rand() % 80 + 120;
+      switch (index) 
+      {
+        case 0 :
+          inimigos[0].PosX = 770;
+          inimigos[0].PosY = 706;
+          inimigos[0].isEnabled = true;
+          inimigos[0].vetY = -1;
+          inimigos[0].vetX = 0;
+          break;
+        case 1:
+          inimigos[index].PosX = 1320 + dist;
+          inimigos[index].PosY = 540;
+          inimigos[index].vetX = -1;
+          inimigos[index].vetY = 0;
+          inimigos[index].isEnabled = true;
+          break;
+        case 2:
+          inimigos[index].PosX = 770;
+          inimigos[index].PosY = 706 + dist;
+          inimigos[index].vetY = -1;
+          inimigos[index].vetX = 0;
+          inimigos[index].isEnabled = true;
+          break;
+        case 3:
+          inimigos[index].PosX = 500;
+          inimigos[index].PosY = -180 - dist;
+          inimigos[index].vetY = 1;
+          inimigos[index].vetX = 0;
+          inimigos[index].isEnabled = true;
+          break;
+        case 4:
+          inimigos[index].PosX = 1100;
+          inimigos[index].PosY = -180 - dist;
+          inimigos[index].vetY = 1;
+          inimigos[index].vetX = 0;
+          inimigos[index].isEnabled = true;
+          break;
+        case 5:
+          inimigos[index].PosX = 200;
+          inimigos[index].PosY = -180 - dist;
+          inimigos[index].vetY = 1;
+          inimigos[index].vetX = 0;
+          inimigos[index].isEnabled = true;
+          break;  
+      }
+      inimigos[index].speed = 4;
       inimigos[index].life = 80;
-      inimigos[index].isEnabled = true;
-		  break;
-		case 2:
-			inimigos[index].PosX = 770;
-    		inimigos[index].PosY = 706 + dist;
-    		inimigos[index].vetY = -1;
-    		inimigos[index].vetX = 0;
-        inimigos[index].life = 80;
-        inimigos[index].isEnabled = true;
-    		break;
-    	case 3:
-    		inimigos[index].PosX = 500;
-    		inimigos[index].PosY = -180 - dist;
-    		inimigos[index].vetY = 1;
-    		inimigos[index].vetX = 0;
-        inimigos[index].life = 80;
-        inimigos[index].isEnabled = true;
-    		break;  
-	  }
-    
-    //inimigos[index].vetX = -1;
-    //inimigos[index].vetY = 0;
-    inimigos[index].speed = 4;
-    inimigos[index].life = 80;
+    }
   }
-  
-  inimigos[0].PosX = 770;
-  inimigos[0].PosY = 706;
-  inimigos[0].isEnabled = true;
-  inimigos[0].vetY = -1;
-  inimigos[0].vetX = 0;
-  inimigos[0].speed = 4;
-  inimigos[0].life = 80;
-
 }
 
 
@@ -692,8 +706,6 @@ void imagesRenderer()
   ImageConfig(TamP[12],imagens[12],mascaras[12]);
    
   cleardevice();// limpa a tela
-  
-  
 }
 
 
@@ -800,41 +812,46 @@ void putImages(int id)
   inimigos[2].isEnabled ? putimage(inimigos[2].PosX, inimigos[2].PosY, imagens[3], OR_PUT)  : nothing();
   inimigos[3].isEnabled ? putimage(inimigos[3].PosX, inimigos[3].PosY, mascaras[12],AND_PUT): nothing();
   inimigos[3].isEnabled ? putimage(inimigos[3].PosX, inimigos[3].PosY, imagens[12], OR_PUT) : nothing();
-  
-  /*putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, imagens[12], OR_PUT);
-  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, imagens[12] , OR_PUT);
-  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[12],AND_PUT);
-  putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, imagens[12] , OR_PUT);*/
+  inimigos[4].isEnabled ? putimage(inimigos[4].PosX, inimigos[4].PosY, mascaras[3],AND_PUT) : nothing();
+  inimigos[4].isEnabled ? putimage(inimigos[4].PosX, inimigos[4].PosY, imagens[3], OR_PUT)  : nothing();
+  inimigos[5].isEnabled ? putimage(inimigos[5].PosX, inimigos[5].PosY, mascaras[3],AND_PUT) : nothing();
+  inimigos[5].isEnabled ? putimage(inimigos[5].PosX, inimigos[5].PosY, imagens[3], OR_PUT)  : nothing();
+  inimigos[6].isEnabled ? putimage(inimigos[6].PosX, inimigos[6].PosY, mascaras[12],AND_PUT): nothing();
+  inimigos[6].isEnabled ? putimage(inimigos[6].PosX, inimigos[6].PosY, imagens[12], OR_PUT) : nothing();
+  // putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[0].x, colisionRoutesBoxes[0].y,  imagens[7], OR_PUT);
+  // putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[1].x, colisionRoutesBoxes[1].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[2].x, colisionRoutesBoxes[2].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[3].x, colisionRoutesBoxes[3].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[4].x, colisionRoutesBoxes[4].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[5].x, colisionRoutesBoxes[5].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[6].x, colisionRoutesBoxes[6].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[7].x, colisionRoutesBoxes[7].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[8].x, colisionRoutesBoxes[8].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[9].x, colisionRoutesBoxes[9].y,  imagens[7] , OR_PUT);
+  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y, mascaras[7],AND_PUT);
+  putimage(colisionRoutesBoxes[10].x, colisionRoutesBoxes[10].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[11].x, colisionRoutesBoxes[11].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[12].x, colisionRoutesBoxes[12].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[13].x, colisionRoutesBoxes[13].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[14].x, colisionRoutesBoxes[14].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[15].x, colisionRoutesBoxes[15].y,  imagens[7] , OR_PUT);
+  // putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y, mascaras[7],AND_PUT);
+  // putimage(colisionRoutesBoxes[16].x, colisionRoutesBoxes[16].y,  imagens[7] , OR_PUT);
   setfillstyle(1,BLACK);
   rectangle(10,10,10,10);
 }
@@ -1002,7 +1019,7 @@ void MoveTroupes()
 		inimigos[gameConfig.enemiesIndex].vetX = -1;
 		inimigos[gameConfig.enemiesIndex].vetY = 0; 
 	} 
-	
+
 	if (inimigos[gameConfig.enemiesIndex].PosX >= 648 && 
       inimigos[gameConfig.enemiesIndex].PosX <= 548 && 
       inimigos[gameConfig.enemiesIndex].PosY >= 140 && 
@@ -1011,6 +1028,15 @@ void MoveTroupes()
 		inimigos[gameConfig.enemiesIndex].vetX = 0;
 		inimigos[gameConfig.enemiesIndex].vetY = 1; 
 	} 
+
+  if (inimigos[gameConfig.enemiesIndex].PosX >= colisionRoutesBoxes[10].x       && 
+      inimigos[gameConfig.enemiesIndex].PosX <= colisionRoutesBoxes[10].x + 100 && 
+      inimigos[gameConfig.enemiesIndex].PosY >= colisionRoutesBoxes[10].y       && 
+      inimigos[gameConfig.enemiesIndex].PosY <= colisionRoutesBoxes[10].y + 100) 
+  {
+		inimigos[gameConfig.enemiesIndex].vetX = colisionRoutesBoxes[10].vetX;
+		inimigos[gameConfig.enemiesIndex].vetY = colisionRoutesBoxes[10].vetY; 
+	}
 	
   inimigos[gameConfig.enemiesIndex].PosX += inimigos[gameConfig.enemiesIndex].vetX * inimigos[gameConfig.enemiesIndex].speed;
   inimigos[gameConfig.enemiesIndex].PosY += inimigos[gameConfig.enemiesIndex].vetY * inimigos[gameConfig.enemiesIndex].speed;
@@ -1187,7 +1213,7 @@ void UIRenderer()
           mciSendString(TEXT("play src/Start.wav"), NULL, 0, NULL);
           Sleep(1000);
           gameConfig.scene = 5; 
-          setInitialEnemyConfig();
+          setInitialEnemyConfig(0);
           gameConfig.horda = 1; // come�a o ataque
         }
       }
